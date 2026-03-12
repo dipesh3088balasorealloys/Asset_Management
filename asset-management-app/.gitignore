@@ -1,0 +1,11 @@
+node_modules/
+.env
+tmp/
+dist/
+*.log
+uploads/ewaste/
+coverage/
+.DS_Store
+Thumbs.db
+client/dist/
+scripts/import-*.js

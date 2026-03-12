@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BAL Connect — Asset Management System Documentation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #1a1a2e; line-height: 1.6; }
+
+    /* Header */
+    .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; padding: 30px 40px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .header h1 { font-size: 28px; font-weight: 700; letter-spacing: 0.5px; }
+    .header p { opacity: 0.8; font-size: 14px; margin-top: 4px; }
+    .header-meta { display: flex; gap: 30px; margin-top: 12px; flex-wrap: wrap; }
+    .header-meta span { background: rgba(255,255,255,0.15); padding: 4px 14px; border-radius: 20px; font-size: 12px; backdrop-filter: blur(10px); }
+
+    /* Navigation */
+    .nav { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 100px; z-index: 99; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .nav a { text-decoration: none; color: #666; padding: 14px 20px; font-size: 13px; font-weight: 600; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; }
+    .nav a:hover, .nav a.active { color: #0f3460; border-bottom-color: #0f3460; }
+
+    /* Main Content */
+    .container { max-width: 1400px; margin: 0 auto; padding: 30px 40px; }
+
+    /* Stats Cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+    .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 4px solid; transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-card.blue { border-left-color: #3b82f6; }
+    .stat-card.green { border-left-color: #10b981; }
+    .stat-card.orange { border-left-color: #f59e0b; }
+    .stat-card.purple { border-left-color: #8b5cf6; }
+    .stat-card.red { border-left-color: #ef4444; }
+    .stat-card.teal { border-left-color: #14b8a6; }
+    .stat-number { font-size: 32px; font-weight: 800; color: #1a1a2e; }
+    .stat-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+    /* Section */
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 10px; }
+    .section-title .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .section-title .icon.blue { background: #dbeafe; color: #3b82f6; }
+    .section-title .icon.green { background: #d1fae5; color: #10b981; }
+    .section-title .icon.orange { background: #fef3c7; color: #f59e0b; }
+    .section-title .icon.purple { background: #ede9fe; color: #8b5cf6; }
+    .section-title .icon.red { background: #fee2e2; color: #ef4444; }
+    .section-title .icon.teal { background: #ccfbf1; color: #14b8a6; }
+
+    /* Table */
+    .table-wrapper { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f8fafc; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+    tr:hover td { background: #f8fafc; }
+    .table-title { padding: 16px 20px; font-weight: 700; font-size: 15px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .table-title .badge { font-size: 11px; background: #e2e8f0; padding: 3px 10px; border-radius: 12px; font-weight: 600; color: #475569; }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-green { background: #d1fae5; color: #059669; }
+    .badge-orange { background: #fef3c7; color: #d97706; }
+    .badge-purple { background: #ede9fe; color: #7c3aed; }
+    .badge-red { background: #fee2e2; color: #dc2626; }
+    .badge-gray { background: #f1f5f9; color: #64748b; }
+    .badge-teal { background: #ccfbf1; color: #0d9488; }
+
+    /* Code */
+    code { font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #e11d48; }
+    .sql-block { background: #1e293b; color: #e2e8f0; padding: 16px 20px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 12px; overflow-x: auto; margin: 8px 0; line-height: 1.8; }
+    .sql-block .keyword { color: #93c5fd; font-weight: 600; }
+    .sql-block .param { color: #fbbf24; }
+    .sql-block .comment { color: #64748b; font-style: italic; }
+
+    /* ER Diagram */
+    .er-diagram { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .er-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .er-table { border: 2px solid #e2e8f0; border-radius: 10px; overflow: hidden; transition: all 0.2s; }
+    .er-table:hover { border-color: #3b82f6; box-shadow: 0 4px 16px rgba(59,130,246,0.15); }
+    .er-table-name { background: #1e293b; color: white; padding: 10px 14px; font-weight: 700; font-size: 13px; display: flex; justify-content: space-between; }
+    .er-table-name .rows { background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 10px; font-size: 11px; }
+    .er-col { padding: 5px 14px; font-size: 12px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .er-col:last-child { border-bottom: none; }
+    .er-col .pk { color: #f59e0b; font-weight: 800; font-size: 10px; }
+    .er-col .fk { color: #3b82f6; font-weight: 800; font-size: 10px; }
+    .er-col .type { color: #94a3b8; font-size: 11px; }
+
+    /* Relationship Lines */
+    .relationships { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .rel-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .rel-item:last-child { border-bottom: none; }
+    .rel-arrow { color: #3b82f6; font-weight: 700; font-size: 16px; }
+
+    /* API Routes */
+    .route-group { margin-bottom: 16px; }
+    .route-group-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #334155; }
+    .route { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 13px; }
+    .method { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: monospace; min-width: 56px; text-align: center; }
+    .method.get { background: #d1fae5; color: #059669; }
+    .method.post { background: #dbeafe; color: #1d4ed8; }
+    .method.put { background: #fef3c7; color: #d97706; }
+    .method.delete { background: #fee2e2; color: #dc2626; }
+    .route-path { font-family: monospace; color: #334155; }
+    .route-desc { color: #94a3b8; font-size: 12px; }
+
+    /* Architecture */
+    .arch-flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .arch-box { padding: 16px 24px; border-radius: 10px; font-weight: 700; font-size: 13px; text-align: center; min-width: 140px; }
+    .arch-arrow { font-size: 24px; color: #94a3b8; padding: 0 8px; }
+    .arch-box.frontend { background: #dbeafe; color: #1d4ed8; border: 2px solid #93c5fd; }
+    .arch-box.backend { background: #d1fae5; color: #059669; border: 2px solid #6ee7b7; }
+    .arch-box.database { background: #fef3c7; color: #d97706; border: 2px solid #fcd34d; }
+    .arch-box.external { background: #ede9fe; color: #7c3aed; border: 2px solid #c4b5fd; }
+    .arch-sub { font-size: 10px; font-weight: 400; opacity: 0.7; margin-top: 4px; }
+
+    /* Print */
+    @media print { .nav, .header { position: static; } }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>BAL Connect — Asset Management System</h1>
+  <p>Technical Documentation &amp; Database Reference</p>
+  <div class="header-meta">
+    <span>Balasore Alloys Ltd.</span>
+    <span>Version 1.0</span>
+    <span>Generated: March 12, 2026</span>
+    <span>Server: 192.168.3.62:3306</span>
+    <span>Database: asset_mgmt</span>
+  </div>
+</div>
+
+<!-- Navigation -->
+<div class="nav" id="nav">
+  <a href="#overview" class="active">Overview</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#tables">Tables (17)</a>
+  <a href="#er-diagram">ER Diagram</a>
+  <a href="#stored-procedures">Stored Procedures (18)</a>
+  <a href="#api-routes">API Routes (65+)</a>
+  <a href="#locations">Locations &amp; Data</a>
+</div>
+
+<div class="container">
+
+  <!-- ==================== OVERVIEW ==================== -->
+  <div id="overview" class="section">
+    <div class="section-title"><div class="icon blue">📊</div> System Overview</div>
+    <div class="stats-grid">
+      <div class="stat-card blue"><div class="stat-number">17</div><div class="stat-label">Database Tables</div></div>
+      <div class="stat-card green"><div class="stat-number">18</div><div class="stat-label">Stored Procedures</div></div>
+      <div class="stat-card orange"><div class="stat-number">65+</div><div class="stat-label">API Endpoints</div></div>
+      <div class="stat-card purple"><div class="stat-number">295</div><div class="stat-label">Total Assets</div></div>
+      <div class="stat-card red"><div class="stat-number">281</div><div class="stat-label">Assignments</div></div>
+      <div class="stat-card teal"><div class="stat-number">4</div><div class="stat-label">Locations</div></div>
+    </div>
+
+    <div class="table-wrapper">
+      <div class="table-title">Project Tech Stack</div>
+      <table>
+        <tr><th style="width:140px">Layer</th><th>Technology</th><th>Details</th></tr>
+        <tr><td><span class="badge badge-blue">Frontend</span></td><td>React 19 + Vite 7.x</td><td>SPA with role-based routing, charts, CSV/Excel/PDF export, debounced search</td></tr>
+        <tr><td><span class="badge badge-green">Backend</span></td><td>Express.js + Node.js</td><td>REST API with JWT auth, rate limiting, helmet security, audit logging</td></tr>
+        <tr><td><span class="badge badge-orange">Database</span></td><td>MySQL 8.0</td><td>Stored procedures for all data operations, foreign keys, indexes</td></tr>
+        <tr><td><span class="badge badge-purple">ORM</span></td><td>Prisma (schema only)</td><td>Schema management &amp; migrations, raw SQL via mysql2 for stored procedures</td></tr>
+        <tr><td><span class="badge badge-red">Auth</span></td><td>JWT + bcryptjs</td><td>Role-based access: admin, manager, viewer. 24h token expiry</td></tr>
+        <tr><td><span class="badge badge-teal">Email</span></td><td>Nodemailer + Office 365</td><td>SMTP via smtp.office365.com:587, assignment notification emails</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== ARCHITECTURE ==================== -->
+  <div id="architecture" class="section">
+    <div class="section-title"><div class="icon green">🏗️</div> System Architecture</div>
+    <div class="arch-flow">
+      <div class="arch-box frontend">React 19<div class="arch-sub">Port 5173 (Vite)</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box backend">Express API<div class="arch-sub">Port 3000</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box database">MySQL 8.0<div class="arch-sub">192.168.3.62:3306<br>asset_mgmt</div></div>
+      <div class="arch-arrow">←→</div>
+      <div class="arch-box external">SAP Corp DB<div class="arch-sub">192.168.3.62:3306<br>balcorpdb (READ-ONLY)</div></div>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-title">Authentication &amp; Authorization Flow</div>
+      <table>
+        <tr><th>Role</th><th>Permissions</th><th>Access Level</th></tr>
+        <tr><td><span class="badge badge-red">admin</span></td><td>Full CRUD on all modules, user management, audit log access, delete operations</td><td>All pages + User Management</td></tr>
+        <tr><td><span class="badge badge-orange">manager</span></td><td>Create/Update on all modules, import data, export reports</td><td>All pages except User Management</td></tr>
+        <tr><td><span class="badge badge-gray">viewer</span></td><td>Read-only access to all data, export reports</td><td>All pages (read-only)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== TABLES ==================== -->
+  <div id="tables" class="section">
+    <div class="section-title"><div class="icon orange">🗄️</div> Database Tables (17)</div>
+
+    <!-- Core Tables -->
+    <div class="table-wrapper">
+      <div class="table-title">Core Business Tables <span class="badge">7 tables</span></div>
+      <table>
+        <tr><th style="width:180px">Table</th><th style="width:70px">Rows</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
+        <tr>
+          <td><code>assets</code></td><td><strong>295</strong></td>
+          <td>Master table for all IT assets (laptops, desktops, etc.). Tracks inventory, location, vendor, pricing, warranty. Supports soft delete via <code>is_deleted</code>.</td>
+          <td>id, category, name, serial_no, quantity, assigned, available, vendor, location_id, price</td>
+        </tr>
+        <tr>
+          <td><code>assignments</code></td><td><strong>281</strong></td>
+          <td>Tracks which employee has been assigned assets/licenses. Links to departments and locations. Each assignment can have multiple assets via <code>assignment_assets</code>.</td>
+          <td>id, emp_name, emp_id, department_id, emp_email, location_id, assign_date, is_active</td>
+        </tr>
+        <tr>
+          <td><code>assignment_assets</code></td><td><strong>286</strong></td>
+          <td>Junction/bridge table linking assignments to assets (many-to-many). One employee can have multiple assets, one asset belongs to one active assignment.</td>
+          <td>assignment_id → assignments.id, asset_id → assets.id, quantity</td>
+        </tr>
+        <tr>
+          <td><code>assignment_licenses</code></td><td><strong>0</strong></td>
+          <td>Junction table linking assignments to software licenses (many-to-many). Tracks which licenses are assigned to which employee.</td>
+          <td>assignment_id → assignments.id, license_id → licenses.id, quantity</td>
+        </tr>
+        <tr>
+          <td><code>licenses</code></td><td><strong>0</strong></td>
+          <td>Manages software license inventory. Tracks license keys, vendor, validity period, usage count. Supports expiry alerts.</td>
+          <td>id, name, quantity, used, available, license_key, start_date, end_date, vendor</td>
+        </tr>
+        <tr>
+          <td><code>services</code></td><td><strong>0</strong></td>
+          <td>IT services &amp; subscriptions (SaaS, Cloud, Maintenance, etc.). Tracks cost, billing cycle, contract period for cost analysis.</td>
+          <td>id, type (enum), name, provider, cost, status, billing_cycle, start_date, end_date</td>
+        </tr>
+        <tr>
+          <td><code>ewaste</code></td><td><strong>1</strong></td>
+          <td>E-waste disposal records. Tracks disposed assets, billing, vendor, cost, and reason. Linked to photos via <code>ewaste_photos</code>.</td>
+          <td>id, title, billing_number, asset_names (JSON), disposal_date, disposed_to, disposal_cost</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Reference Tables -->
+    <div class="table-wrapper">
+      <div class="table-title">Reference &amp; Lookup Tables <span class="badge">3 tables</span></div>
+      <table>
+        <tr><th style="width:180px">Table</th><th style="width:70px">Rows</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
+        <tr>
+          <td><code>locations</code></td><td><strong>4</strong></td>
+          <td>Plant/office locations. Each asset and assignment is linked to a location. Used for location-based filtering across the app.</td>
+          <td>id, name, code (unique), is_active</td>
+        </tr>
+        <tr>
+          <td><code>departments</code></td><td><strong>64</strong></td>
+          <td>Department master list. Used in assignments for categorization. Auto-created during data import.</td>
+          <td>id, name (unique)</td>
+        </tr>
+        <tr>
+          <td><code>user_locations</code></td><td><strong>1</strong></td>
+          <td>Junction table restricting which locations a user (manager/viewer) can access. Admins bypass this restriction.</td>
+          <td>user_id → users.id, location_id → locations.id</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- System Tables -->
+    <div class="table-wrapper">
+      <div class="table-title">System &amp; Audit Tables <span class="badge">4 tables</span></div>
+      <table>
+        <tr><th style="width:180px">Table</th><th style="width:70px">Rows</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
+        <tr>
+          <td><code>users</code></td><td><strong>5</strong></td>
+          <td>Application users with hashed passwords. Three roles: admin, manager, viewer. Tracks last login time.</td>
+          <td>id, employee_id, email, password_hash, full_name, role (enum), is_active</td>
+        </tr>
+        <tr>
+          <td><code>audit_log</code></td><td><strong>7</strong></td>
+          <td>Immutable audit trail of all system actions. Logs CREATE, UPDATE, DELETE, ASSIGN, UNASSIGN, IMPORT, LOGIN with old/new JSON values.</td>
+          <td>id, user_id, action (enum), entity_type, entity_id, old_values (JSON), new_values (JSON)</td>
+        </tr>
+        <tr>
+          <td><code>email_log</code></td><td><strong>0</strong></td>
+          <td>Tracks all outbound emails sent by the system (assignment notifications, alerts). Logs delivery status and errors.</td>
+          <td>id, to_email, subject, template, status, error</td>
+        </tr>
+        <tr>
+          <td><code>ewaste_photos</code></td><td><strong>0</strong></td>
+          <td>Photo attachments for e-waste disposal records. Supports multiple photos per record with type classification.</td>
+          <td>id, ewaste_id → ewaste.id, file_path, photo_type, original_name</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Backup Tables -->
+    <div class="table-wrapper">
+      <div class="table-title">Backup &amp; Recovery Tables <span class="badge">3 tables</span></div>
+      <table>
+        <tr><th style="width:180px">Table</th><th style="width:70px">Rows</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
+        <tr>
+          <td><code>db_backups</code></td><td><strong>1</strong></td>
+          <td>Database backup schedule tracking. Records backup type, schedule, status, size, and responsible person.</td>
+          <td>id, database_name, db_engine, backup_type, backup_schedule, last_backup_status, backup_size_gb</td>
+        </tr>
+        <tr>
+          <td><code>server_backups</code></td><td><strong>1</strong></td>
+          <td>Server backup tracking. Monitors server-level backup schedules, storage paths, and backup health.</td>
+          <td>id, server_name, server_ip, backup_type, backup_schedule, last_backup_status</td>
+        </tr>
+        <tr>
+          <td><code>employee_backups</code></td><td><strong>2</strong></td>
+          <td>Employee data backup records (email, OneDrive, desktop/laptop). Tracks which backups are completed per employee.</td>
+          <td>id, email_id, user_name, email_backup, onedrive_backup, desktop_laptop_backup, disk_name</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== ER DIAGRAM ==================== -->
+  <div id="er-diagram" class="section">
+    <div class="section-title"><div class="icon purple">🔗</div> Entity Relationship Diagram</div>
+
+    <div class="er-diagram">
+      <div class="er-grid">
+        <!-- assets -->
+        <div class="er-table">
+          <div class="er-table-name">assets <span class="rows">295 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span>category</span><span class="type">varchar(50)</span></div>
+          <div class="er-col"><span>name</span><span class="type">varchar(191)</span></div>
+          <div class="er-col"><span>serial_no</span><span class="type">varchar(191)</span></div>
+          <div class="er-col"><span>quantity / assigned / available</span><span class="type">int</span></div>
+          <div class="er-col"><span>price</span><span class="type">decimal(12,2)</span></div>
+          <div class="er-col"><span>vendor</span><span class="type">varchar(191)</span></div>
+          <div class="er-col"><span><span class="fk">FK</span> location_id</span><span class="type">→ locations.id</span></div>
+          <div class="er-col"><span><span class="fk">FK</span> created_by</span><span class="type">→ users.id</span></div>
+        </div>
+
+        <!-- assignments -->
+        <div class="er-table">
+          <div class="er-table-name">assignments <span class="rows">281 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span>emp_name / emp_id</span><span class="type">varchar(191)</span></div>
+          <div class="er-col"><span><span class="fk">FK</span> department_id</span><span class="type">→ departments.id</span></div>
+          <div class="er-col"><span>emp_email</span><span class="type">varchar(191)</span></div>
+          <div class="er-col"><span><span class="fk">FK</span> location_id</span><span class="type">→ locations.id</span></div>
+          <div class="er-col"><span>assign_date</span><span class="type">datetime</span></div>
+          <div class="er-col"><span>is_active</span><span class="type">tinyint(1)</span></div>
+          <div class="er-col"><span><span class="fk">FK</span> created_by</span><span class="type">→ users.id</span></div>
+        </div>
+
+        <!-- assignment_assets -->
+        <div class="er-table">
+          <div class="er-table-name">assignment_assets <span class="rows">286 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span><span class="fk">FK</span> assignment_id</span><span class="type">→ assignments.id</span></div>
+          <div class="er-col"><span><span class="fk">FK</span> asset_id</span><span class="type">→ assets.id</span></div>
+          <div class="er-col"><span>quantity</span><span class="type">int (default 1)</span></div>
+        </div>
+
+        <!-- locations -->
+        <div class="er-table">
+          <div class="er-table-name">locations <span class="rows">4 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span>name</span><span class="type">varchar(100) UNIQUE</span></div>
+          <div class="er-col"><span>code</span><span class="type">varchar(10) UNIQUE</span></div>
+          <div class="er-col"><span>is_active</span><span class="type">tinyint(1)</span></div>
+        </div>
+
+        <!-- departments -->
+        <div class="er-table">
+          <div class="er-table-name">departments <span class="rows">64 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span>name</span><span class="type">varchar(191) UNIQUE</span></div>
+        </div>
+
+        <!-- users -->
+        <div class="er-table">
+          <div class="er-table-name">users <span class="rows">5 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span>employee_id</span><span class="type">varchar(50) UNIQUE</span></div>
+          <div class="er-col"><span>email</span><span class="type">varchar(191) UNIQUE</span></div>
+          <div class="er-col"><span>password_hash</span><span class="type">varchar(191)</span></div>
+          <div class="er-col"><span>role</span><span class="type">enum(admin,manager,viewer)</span></div>
+          <div class="er-col"><span>is_active</span><span class="type">tinyint(1)</span></div>
+        </div>
+
+        <!-- audit_log -->
+        <div class="er-table">
+          <div class="er-table-name">audit_log <span class="rows">7 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span><span class="fk">FK</span> user_id</span><span class="type">→ users.id</span></div>
+          <div class="er-col"><span>action</span><span class="type">enum(7 types)</span></div>
+          <div class="er-col"><span>entity_type / entity_id</span><span class="type">varchar / int</span></div>
+          <div class="er-col"><span>old_values / new_values</span><span class="type">JSON</span></div>
+        </div>
+
+        <!-- licenses -->
+        <div class="er-table">
+          <div class="er-table-name">licenses <span class="rows">0 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span>name / vendor</span><span class="type">varchar(191)</span></div>
+          <div class="er-col"><span>quantity / used / available</span><span class="type">int</span></div>
+          <div class="er-col"><span>license_key</span><span class="type">varchar(500)</span></div>
+          <div class="er-col"><span>start_date / end_date</span><span class="type">date</span></div>
+        </div>
+
+        <!-- services -->
+        <div class="er-table">
+          <div class="er-table-name">services <span class="rows">0 rows</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span>type</span><span class="type">enum(8 types)</span></div>
+          <div class="er-col"><span>name / provider</span><span class="type">varchar(191)</span></div>
+          <div class="er-col"><span>cost</span><span class="type">decimal(12,2)</span></div>
+          <div class="er-col"><span>billing_cycle</span><span class="type">enum(4 types)</span></div>
+        </div>
+
+        <!-- ewaste -->
+        <div class="er-table">
+          <div class="er-table-name">ewaste <span class="rows">1 row</span></div>
+          <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
+          <div class="er-col"><span>title</span><span class="type">varchar(255)</span></div>
+          <div class="er-col"><span>asset_names</span><span class="type">JSON</span></div>
+          <div class="er-col"><span>disposal_date</span><span class="type">date</span></div>
+          <div class="er-col"><span>disposal_cost</span><span class="type">decimal(12,2)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Foreign Key Relationships -->
+    <div class="relationships">
+      <h3 style="margin-bottom: 12px; font-size: 15px; color: #334155;">Foreign Key Relationships (13)</h3>
+      <div class="rel-item"><code>assets.created_by</code> <span class="rel-arrow">→</span> <code>users.id</code> <span class="route-desc">Asset creator tracking</span></div>
+      <div class="rel-item"><code>assets.location_id</code> <span class="rel-arrow">→</span> <code>locations.id</code> <span class="route-desc">Asset belongs to location</span></div>
+      <div class="rel-item"><code>assignments.department_id</code> <span class="rel-arrow">→</span> <code>departments.id</code> <span class="route-desc">Employee department</span></div>
+      <div class="rel-item"><code>assignments.created_by</code> <span class="rel-arrow">→</span> <code>users.id</code> <span class="route-desc">Assignment creator</span></div>
+      <div class="rel-item"><code>assignment_assets.assignment_id</code> <span class="rel-arrow">→</span> <code>assignments.id</code> <span class="route-desc">Links asset to assignment</span></div>
+      <div class="rel-item"><code>assignment_assets.asset_id</code> <span class="rel-arrow">→</span> <code>assets.id</code> <span class="route-desc">Links assignment to asset</span></div>
+      <div class="rel-item"><code>assignment_licenses.assignment_id</code> <span class="rel-arrow">→</span> <code>assignments.id</code> <span class="route-desc">Links license to assignment</span></div>
+      <div class="rel-item"><code>assignment_licenses.license_id</code> <span class="rel-arrow">→</span> <code>licenses.id</code> <span class="route-desc">Links assignment to license</span></div>
+      <div class="rel-item"><code>audit_log.user_id</code> <span class="rel-arrow">→</span> <code>users.id</code> <span class="route-desc">Who performed the action</span></div>
+      <div class="rel-item"><code>ewaste_photos.ewaste_id</code> <span class="rel-arrow">→</span> <code>ewaste.id</code> <span class="route-desc">Photo belongs to e-waste record</span></div>
+      <div class="rel-item"><code>licenses.created_by</code> <span class="rel-arrow">→</span> <code>users.id</code> <span class="route-desc">License creator</span></div>
+      <div class="rel-item"><code>services.created_by</code> <span class="rel-arrow">→</span> <code>users.id</code> <span class="route-desc">Service creator</span></div>
+      <div class="rel-item"><code>user_locations.user_id / location_id</code> <span class="rel-arrow">→</span> <code>users.id / locations.id</code> <span class="route-desc">User location restriction</span></div>
+    </div>
+  </div>
+
+  <!-- ==================== STORED PROCEDURES ==================== -->
+  <div id="stored-procedures" class="section">
+    <div class="section-title"><div class="icon red">⚡</div> Stored Procedures (18)</div>
+
+    <!-- Asset Procedures -->
+    <div class="table-wrapper">
+      <div class="table-title">Asset Management Procedures <span class="badge">1 procedure</span></div>
+      <table>
+        <tr><th style="width:200px">Procedure</th><th>Parameters</th><th>Use Case</th></tr>
+        <tr>
+          <td><code>asset_list</code></td>
+          <td>
+            <code>p_category</code> VARCHAR(500) — filter by category<br>
+            <code>p_search</code> VARCHAR(255) — search name/serial/vendor<br>
+            <code>p_stock_status</code> VARCHAR(20) — in_stock/out_of_stock/low<br>
+            <code>p_location_ids</code> VARCHAR(255) — comma-separated location IDs<br>
+            <code>p_sort_field</code> VARCHAR(50) — column to sort by<br>
+            <code>p_sort_dir</code> VARCHAR(4) — ASC/DESC<br>
+            <code>p_page</code> INT — page number<br>
+            <code>p_limit</code> INT — rows per page
+          </td>
+          <td>
+            <strong>Lists all assets with pagination, filtering &amp; sorting.</strong>
+            Returns two result sets: data rows + total count.
+            Used by Assets page. Supports multi-location filter, stock status filter, full-text search across name, serial number, and vendor.
+            Dynamic SQL with PREPARE/EXECUTE for flexible sorting.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Assignment Procedures -->
+    <div class="table-wrapper">
+      <div class="table-title">Assignment Procedures <span class="badge">4 procedures</span></div>
+      <table>
+        <tr><th style="width:200px">Procedure</th><th>Parameters</th><th>Use Case</th></tr>
+        <tr>
+          <td><code>assignment_list</code></td>
+          <td>
+            <code>p_search</code> — search emp name/id/email<br>
+            <code>p_department</code> — filter by dept name<br>
+            <code>p_location_ids</code> — comma-separated IDs<br>
+            <code>p_sort_field/p_sort_dir</code> — sorting<br>
+            <code>p_page/p_limit</code> — pagination
+          </td>
+          <td><strong>Lists active assignments with joined asset names, department, location.</strong> Returns paginated data + count. Used by Assignments page.</td>
+        </tr>
+        <tr>
+          <td><code>assignment_create</code></td>
+          <td>
+            <code>p_emp_name/p_emp_id/p_department_name</code><br>
+            <code>p_emp_email/p_location/p_designation</code><br>
+            <code>p_location_id/p_assign_date/p_notes</code><br>
+            <code>p_created_by</code> — user who assigned<br>
+            <code>p_asset_ids</code> — comma-separated asset IDs<br>
+            <code>p_license_ids</code> — comma-separated license IDs
+          </td>
+          <td><strong>Creates an assignment with linked assets and licenses in a single transaction.</strong> Inserts into assignments, assignment_assets, assignment_licenses. Updates asset.assigned/available counts. Auto-creates department if new.</td>
+        </tr>
+        <tr>
+          <td><code>assignment_get</code></td>
+          <td><code>p_id</code> INT — assignment ID</td>
+          <td><strong>Retrieves full assignment details</strong> including all linked assets (name, serial, category) and licenses. Used for assignment detail view &amp; edit form.</td>
+        </tr>
+        <tr>
+          <td><code>assignment_remove</code></td>
+          <td><code>p_id</code> INT — assignment ID</td>
+          <td><strong>Deactivates an assignment</strong> (sets is_active=0). Releases all linked assets back to available pool (increments available, decrements assigned).</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Audit Procedure -->
+    <div class="table-wrapper">
+      <div class="table-title">Audit &amp; User Procedures <span class="badge">4 procedures</span></div>
+      <table>
+        <tr><th style="width:200px">Procedure</th><th>Parameters</th><th>Use Case</th></tr>
+        <tr>
+          <td><code>audit_list</code></td>
+          <td>
+            <code>p_action</code> — filter by action type<br>
+            <code>p_entity_type</code> — filter by module<br>
+            <code>p_user_id</code> — filter by user<br>
+            <code>p_start_date/p_end_date</code> — date range<br>
+            <code>p_page/p_limit</code> — pagination<br>
+            <code>p_search</code> — global search across all fields
+          </td>
+          <td><strong>Lists audit log entries with user name join.</strong> Supports filtering by action, entity, user, date range, and global search (searches user name, action, entity type, old/new JSON values). Used by Audit Log page.</td>
+        </tr>
+        <tr>
+          <td><code>user_list</code></td>
+          <td><code>p_search/p_role/p_sort_field/p_sort_dir/p_page/p_limit</code></td>
+          <td><strong>Lists application users</strong> with search, role filter, pagination. Used by User Management page (admin only).</td>
+        </tr>
+        <tr>
+          <td><code>user_create</code></td>
+          <td><code>p_employee_id/p_email/p_password_hash/p_full_name/p_role</code></td>
+          <td><strong>Creates a new user account.</strong> Validates unique email/employee_id. Inserts with hashed password. Used by registration endpoint.</td>
+        </tr>
+        <tr>
+          <td><code>user_update</code></td>
+          <td><code>p_id/p_full_name/p_employee_id/p_email/p_role/p_is_active</code></td>
+          <td><strong>Updates user profile and role.</strong> Can activate/deactivate users. Used by User Management page.</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- License & Service Procedures -->
+    <div class="table-wrapper">
+      <div class="table-title">License, Service &amp; E-Waste Procedures <span class="badge">5 procedures</span></div>
+      <table>
+        <tr><th style="width:200px">Procedure</th><th>Parameters</th><th>Use Case</th></tr>
+        <tr>
+          <td><code>license_list</code></td>
+          <td><code>p_search/p_vendor/p_status/p_sort_field/p_sort_dir/p_page/p_limit</code></td>
+          <td><strong>Lists software licenses</strong> with search, vendor filter, expiry status (active/expired/expiring_soon). Calculates days_remaining dynamically.</td>
+        </tr>
+        <tr>
+          <td><code>service_list</code></td>
+          <td><code>p_type/p_search/p_status/p_sort_field/p_sort_dir/p_page/p_limit</code></td>
+          <td><strong>Lists IT services/subscriptions</strong> with type filter (SaaS, Cloud, etc.), status filter, search. Used by Services page.</td>
+        </tr>
+        <tr>
+          <td><code>service_cost_breakdown</code></td>
+          <td><em>No parameters</em></td>
+          <td><strong>Returns cost analysis by service type.</strong> Aggregates total cost, count, and monthly/yearly breakdowns by billing cycle. Used by Reports page charts.</td>
+        </tr>
+        <tr>
+          <td><code>ewaste_list</code></td>
+          <td><code>p_search/p_sort_field/p_sort_dir/p_page/p_limit</code></td>
+          <td><strong>Lists e-waste disposal records</strong> with photo count, search, pagination. Used by E-Waste page.</td>
+        </tr>
+        <tr>
+          <td><code>ewaste_get</code></td>
+          <td><code>p_id</code> INT</td>
+          <td><strong>Gets single e-waste record with all photos.</strong> Returns two result sets: record details + photo list. Used for detail/edit view.</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Backup & Report Procedures -->
+    <div class="table-wrapper">
+      <div class="table-title">Backup &amp; Report Procedures <span class="badge">4 procedures</span></div>
+      <table>
+        <tr><th style="width:200px">Procedure</th><th>Parameters</th><th>Use Case</th></tr>
+        <tr>
+          <td><code>report_dashboard_summary</code></td>
+          <td><em>No parameters</em></td>
+          <td><strong>Returns complete dashboard statistics</strong> — total assets, assignments, licenses, services, asset breakdown by category, location distribution, recent activity. Powers the Dashboard page.</td>
+        </tr>
+        <tr>
+          <td><code>db_backup_list</code></td>
+          <td><code>p_search/p_db_engine/p_backup_type/p_status/p_sort_field/p_sort_dir/p_page/p_limit</code></td>
+          <td><strong>Lists database backup schedules</strong> with engine filter, status filter. Used by Backup Management page.</td>
+        </tr>
+        <tr>
+          <td><code>server_backup_list</code></td>
+          <td><code>p_search/p_backup_type/p_status/p_sort_field/p_sort_dir/p_page/p_limit</code></td>
+          <td><strong>Lists server backup records</strong> with type/status filters. Used by Backup Management page.</td>
+        </tr>
+        <tr>
+          <td><code>employee_backup_list</code></td>
+          <td><code>p_search/p_sort_field/p_sort_dir/p_page/p_limit</code></td>
+          <td><strong>Lists employee data backup records</strong> (email, OneDrive, desktop). Tracks backup completion status per employee.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== API ROUTES ==================== -->
+  <div id="api-routes" class="section">
+    <div class="section-title"><div class="icon teal">🌐</div> API Routes (65+ Endpoints)</div>
+
+    <div class="table-wrapper" style="padding: 20px;">
+      <!-- Auth -->
+      <div class="route-group">
+        <div class="route-group-title">🔐 Authentication — <code>/api/auth</code></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/login</span><span class="route-desc">— User login (rate limited)</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/register</span><span class="route-desc">— Register new user (admin only)</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/me</span><span class="route-desc">— Get current user profile</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/change-password</span><span class="route-desc">— Change own password</span></div>
+      </div>
+
+      <!-- Assets -->
+      <div class="route-group">
+        <div class="route-group-title">💻 Assets — <code>/api/assets</code></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/</span><span class="route-desc">— List assets (paginated, filterable)</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/low-stock</span><span class="route-desc">— Get low-stock alerts</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/:id</span><span class="route-desc">— Get single asset</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/</span><span class="route-desc">— Create asset (admin/manager + audit)</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/:id</span><span class="route-desc">— Update asset (admin/manager + audit)</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/:id</span><span class="route-desc">— Soft delete asset (admin + audit)</span></div>
+      </div>
+
+      <!-- Assignments -->
+      <div class="route-group">
+        <div class="route-group-title">👤 Assignments — <code>/api/assignments</code></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/</span><span class="route-desc">— List assignments (paginated)</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/:id</span><span class="route-desc">— Get assignment with linked assets</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/</span><span class="route-desc">— Create assignment (admin/manager + audit)</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/:id</span><span class="route-desc">— Update assignment (admin/manager + audit)</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/:id</span><span class="route-desc">— Remove/deactivate assignment (admin + audit)</span></div>
+      </div>
+
+      <!-- Licenses -->
+      <div class="route-group">
+        <div class="route-group-title">🔑 Licenses — <code>/api/licenses</code></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/</span><span class="route-desc">— List licenses (paginated)</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/expiring</span><span class="route-desc">— Get expiring license alerts</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/:id</span><span class="route-desc">— Get single license</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/</span><span class="route-desc">— Create license (admin/manager + audit)</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/:id</span><span class="route-desc">— Update license</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/:id</span><span class="route-desc">— Delete license (admin + audit)</span></div>
+      </div>
+
+      <!-- Services -->
+      <div class="route-group">
+        <div class="route-group-title">☁️ Services — <code>/api/services</code></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/</span><span class="route-desc">— List services (paginated)</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/cost-summary</span><span class="route-desc">— Service cost breakdown</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/:id</span><span class="route-desc">— Get single service</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/</span><span class="route-desc">— Create service (admin/manager + audit)</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/:id</span><span class="route-desc">— Update service</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/:id</span><span class="route-desc">— Delete service (admin + audit)</span></div>
+      </div>
+
+      <!-- E-Waste -->
+      <div class="route-group">
+        <div class="route-group-title">♻️ E-Waste — <code>/api/ewaste</code></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/</span><span class="route-desc">— List e-waste records</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/:id</span><span class="route-desc">— Get record with photos</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/</span><span class="route-desc">— Create with photo upload (max 10)</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/:id</span><span class="route-desc">— Update record</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/:id</span><span class="route-desc">— Delete record (admin)</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/:id/photos</span><span class="route-desc">— Add photos to record</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/:id/photos/:photoId</span><span class="route-desc">— Delete a photo</span></div>
+      </div>
+
+      <!-- Backups -->
+      <div class="route-group">
+        <div class="route-group-title">💾 Backups — <code>/api/backups</code></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/server</span><span class="route-desc">— List server backups</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/server</span><span class="route-desc">— Create server backup record</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/server/:id</span><span class="route-desc">— Update server backup</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/server/:id</span><span class="route-desc">— Delete server backup</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/db</span><span class="route-desc">— List database backups</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/db</span><span class="route-desc">— Create DB backup record</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/db/:id</span><span class="route-desc">— Update DB backup</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/db/:id</span><span class="route-desc">— Delete DB backup</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/employee</span><span class="route-desc">— List employee backups</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/employee</span><span class="route-desc">— Create employee backup</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/employee/:id</span><span class="route-desc">— Update employee backup</span></div>
+        <div class="route"><span class="method delete">DELETE</span><span class="route-path">/employee/:id</span><span class="route-desc">— Delete employee backup</span></div>
+      </div>
+
+      <!-- Users, Reports, Import/Export -->
+      <div class="route-group">
+        <div class="route-group-title">👥 Users — <code>/api/users</code></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/</span><span class="route-desc">— List users (admin only)</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/:id</span><span class="route-desc">— Get user details</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/:id</span><span class="route-desc">— Update user profile/role</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/:id/deactivate</span><span class="route-desc">— Deactivate user</span></div>
+        <div class="route"><span class="method put">PUT</span><span class="route-path">/:id/reset-password</span><span class="route-desc">— Admin reset password</span></div>
+      </div>
+
+      <div class="route-group">
+        <div class="route-group-title">📊 Reports — <code>/api/reports</code></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/dashboard</span><span class="route-desc">— Dashboard summary stats</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/asset-utilization</span><span class="route-desc">— Asset usage analysis</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/license-utilization</span><span class="route-desc">— License usage analysis</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/service-costs</span><span class="route-desc">— Service cost breakdown</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/employee-summary</span><span class="route-desc">— Employee asset summary</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/renewals</span><span class="route-desc">— Upcoming renewals</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/location-summary</span><span class="route-desc">— Per-location breakdown</span></div>
+      </div>
+
+      <div class="route-group">
+        <div class="route-group-title">📥 Import / 📤 Export</div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/api/import/assets</span><span class="route-desc">— Import assets from CSV/Excel</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/api/import/licenses</span><span class="route-desc">— Import licenses</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/api/import/services</span><span class="route-desc">— Import services</span></div>
+        <div class="route"><span class="method post">POST</span><span class="route-path">/api/import/assignments</span><span class="route-desc">— Import assignments</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/api/import/template/:type</span><span class="route-desc">— Download import template</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/api/export/:entity</span><span class="route-desc">— Export to CSV/Excel/PDF</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/api/export/report/:type</span><span class="route-desc">— Export report data</span></div>
+      </div>
+
+      <div class="route-group">
+        <div class="route-group-title">🔧 Other</div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/api/health</span><span class="route-desc">— Health check endpoint</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/api/audit</span><span class="route-desc">— Audit log list (admin only)</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/api/audit/entity/:type/:id</span><span class="route-desc">— Entity change history</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/api/locations</span><span class="route-desc">— List all locations</span></div>
+        <div class="route"><span class="method get">GET</span><span class="route-path">/api/employees</span><span class="route-desc">— Search employees (SAP DB)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LOCATIONS ==================== -->
+  <div id="locations" class="section">
+    <div class="section-title"><div class="icon green">📍</div> Location &amp; Data Summary</div>
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-number">162</div>
+        <div class="stat-label">Balasore Plant (BAL)</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-number">46</div>
+        <div class="stat-label">Kolkata Head Office (KOL)</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-number">26</div>
+        <div class="stat-label">Sukinda Plant (SUK)</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-number">61</div>
+        <div class="stat-label">Kaliapani Mines (MINES)</div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <div class="table-title">Locations</div>
+      <table>
+        <tr><th>ID</th><th>Name</th><th>Code</th><th>Assets</th><th>Status</th></tr>
+        <tr><td>1</td><td>Balasore Plant</td><td>BAL</td><td>162</td><td><span class="badge badge-green">Active</span></td></tr>
+        <tr><td>2</td><td>Kolkata Head Office</td><td>KOL</td><td>46</td><td><span class="badge badge-green">Active</span></td></tr>
+        <tr><td>3</td><td>Sukinda Plant</td><td>SUK</td><td>26</td><td><span class="badge badge-green">Active</span></td></tr>
+        <tr><td>4</td><td>Kaliapani Mines</td><td>MINES</td><td>61</td><td><span class="badge badge-green">Active</span></td></tr>
+      </table>
+    </div>
+
+    <div class="table-wrapper">
+      <div class="table-title">Enum Values Used in Database</div>
+      <table>
+        <tr><th>Table.Column</th><th>Enum Values</th></tr>
+        <tr><td><code>users.role</code></td><td><span class="badge badge-red">admin</span> <span class="badge badge-orange">manager</span> <span class="badge badge-gray">viewer</span></td></tr>
+        <tr><td><code>audit_log.action</code></td><td><span class="badge badge-blue">CREATE</span> <span class="badge badge-orange">UPDATE</span> <span class="badge badge-red">DELETE</span> <span class="badge badge-green">ASSIGN</span> <span class="badge badge-purple">UNASSIGN</span> <span class="badge badge-teal">IMPORT</span> <span class="badge badge-gray">LOGIN</span></td></tr>
+        <tr><td><code>services.type</code></td><td>SaaS, Cloud, Maintenance, Support, Consulting, Hosting, Security, Other</td></tr>
+        <tr><td><code>services.status</code></td><td><span class="badge badge-green">Active</span> <span class="badge badge-orange">Pending</span> <span class="badge badge-red">Cancelled</span></td></tr>
+        <tr><td><code>services.billing_cycle</code></td><td>Monthly, Quarterly, Yearly, OneTime</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align: center; padding: 40px 0; color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; margin-top: 20px;">
+    <strong>BAL Connect — Asset Management System</strong><br>
+    Balasore Alloys Ltd. &copy; 2026 | Documentation generated on March 12, 2026<br>
+    Database: asset_mgmt @ 192.168.3.62:3306 | Backend: Express.js | Frontend: React 19
+  </div>
+
+</div>
+
+<!-- Smooth scroll & nav highlight -->
+<script>
+  document.querySelectorAll('.nav a').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        const offset = 160;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+      document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+  // Highlight nav on scroll
+  window.addEventListener('scroll', () => {
+    const sections = document.querySelectorAll('.section');
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 200;
+      if (window.pageYOffset >= top) current = section.getAttribute('id');
+    });
+    document.querySelectorAll('.nav a').forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
