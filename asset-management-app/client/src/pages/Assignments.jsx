@@ -3,7 +3,7 @@ import { assignmentsApi, assetsApi, licensesApi, importApi, exportApi, employees
 import { formatDate, getCategoryLabel, todayStr } from '../utils';
 
 const departments = ['IT', 'HR', 'Finance', 'Marketing', 'Operations', 'Sales', 'Engineering', 'Design'];
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 1000;
 
 const emptyForm = () => ({
   empName: '',
@@ -33,15 +33,11 @@ function Assignments({ showAlert, user }) {
   const [lookupError, setLookupError] = useState('');
   const [lookupSuccess, setLookupSuccess] = useState(false);
   const [orgLocations, setOrgLocations] = useState([]);
-  const [filterLocation, setFilterLocation] = useState('');
-  const [filterDepartment, setFilterDepartment] = useState('');
+  const [globalSearch, setGlobalSearch] = useState('');
 
   // Edit mode
   const [editingId, setEditingId] = useState(null);
 
-  // Pagination
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const isAdmin = user?.role === 'admin';
@@ -60,13 +56,12 @@ function Assignments({ showAlert, user }) {
     }).catch(() => {});
   }, [user, isAdmin]);
 
-  const fetchAssignments = async (p = page) => {
+  const fetchAssignments = async () => {
     try {
       setLoading(true);
-      const res = await assignmentsApi.list({ page: p, limit: PAGE_SIZE });
+      const res = await assignmentsApi.list({ page: 1, limit: PAGE_SIZE });
       setAssignments(res.data || []);
       const meta = res.meta || {};
-      setTotalPages(meta.totalPages || 1);
       setTotalCount(meta.total || 0);
     } catch {
       showAlert('Failed to load assignments', 'error');
@@ -89,13 +84,9 @@ function Assignments({ showAlert, user }) {
   };
 
   useEffect(() => {
-    fetchAssignments(1);
+    fetchAssignments();
     fetchInventory();
   }, []);
-
-  useEffect(() => {
-    fetchAssignments(page);
-  }, [page]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -276,14 +267,23 @@ function Assignments({ showAlert, user }) {
   const availableAssets = assets.filter((a) => (a.available || 0) > 0);
   const availableLicenses = licenses.filter((l) => (l.available || 0) > 0);
 
-  // Unique departments from actual assignment data
-  const uniqueDepartments = [...new Set(assignments.map(a => a.department?.name).filter(Boolean))].sort();
-
-  // Filtered assignments
+  // Global search filter
   const filteredAssignments = assignments.filter(a => {
-    if (filterLocation && a.orgLocationName !== filterLocation) return false;
-    if (filterDepartment && a.department?.name !== filterDepartment) return false;
-    return true;
+    if (!globalSearch.trim()) return true;
+    const q = globalSearch.toLowerCase().trim();
+    const s = (v) => String(v || '').toLowerCase();
+    return (
+      s(a.empName).includes(q) ||
+      s(a.empId).includes(q) ||
+      s(a.empEmail).includes(q) ||
+      s(a.department?.name).includes(q) ||
+      s(a.designation).includes(q) ||
+      s(a.location).includes(q) ||
+      s(a.orgLocationName).includes(q) ||
+      s(a.notes).includes(q) ||
+      (a.assets || []).some(aa => s(aa.asset?.name).includes(q) || s(aa.asset?.serialNo).includes(q)) ||
+      (a.licenses || []).some(al => s(al.license?.name).includes(q))
+    );
   });
 
   return (
@@ -454,40 +454,30 @@ function Assignments({ showAlert, user }) {
         </div>
       )}
 
-      {/* Filters + Count */}
+      {/* Global Search + Count */}
       <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '16px 0', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ fontWeight: 600, fontSize: '0.85rem', color: '#475569', whiteSpace: 'nowrap' }}>Location:</label>
-          <select
-            value={filterLocation}
-            onChange={e => setFilterLocation(e.target.value)}
-            style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', minWidth: '180px' }}
-          >
-            <option value="">All Locations</option>
-            {orgLocations.map(l => <option key={l.id} value={l.name}>{l.name}</option>)}
-          </select>
+        <div style={{ position: 'relative', flex: '1', maxWidth: '500px' }}>
+          <input
+            type="text"
+            value={globalSearch}
+            onChange={e => setGlobalSearch(e.target.value)}
+            placeholder="Search by name, ID, email, department, location, asset, serial no..."
+            style={{ width: '100%', padding: '9px 38px 9px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', outline: 'none', transition: 'border-color 0.2s', background: '#f8fafc' }}
+            onFocus={e => e.target.style.borderColor = '#6366f1'}
+            onBlur={e => e.target.style.borderColor = '#cbd5e1'}
+          />
+          {globalSearch && (
+            <button
+              onClick={() => setGlobalSearch('')}
+              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', color: '#94a3b8', lineHeight: 1 }}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ fontWeight: 600, fontSize: '0.85rem', color: '#475569', whiteSpace: 'nowrap' }}>Department:</label>
-          <select
-            value={filterDepartment}
-            onChange={e => setFilterDepartment(e.target.value)}
-            style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', minWidth: '180px' }}
-          >
-            <option value="">All Departments</option>
-            {uniqueDepartments.map(d => <option key={d} value={d}>{d}</option>)}
-          </select>
-        </div>
-        {(filterLocation || filterDepartment) && (
-          <button
-            onClick={() => { setFilterLocation(''); setFilterDepartment(''); }}
-            style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#f1f5f9', cursor: 'pointer', fontSize: '0.8rem', color: '#64748b' }}
-          >
-            Clear Filters
-          </button>
-        )}
-        <span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: 'auto' }}>
-          {filterLocation || filterDepartment
+        <span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+          {globalSearch.trim()
             ? `Showing ${filteredAssignments.length} of ${totalCount} assignments`
             : `Total: ${totalCount} assignments`}
         </span>
@@ -499,73 +489,72 @@ function Assignments({ showAlert, user }) {
           {loading ? (
             <div className="loading">Loading assignments...</div>
           ) : filteredAssignments.length === 0 ? (
-            <div className="empty-state">{assignments.length === 0 ? 'No assignments found. Create your first assignment above.' : 'No assignments match the selected filters.'}</div>
+            <div className="empty-state">{assignments.length === 0 ? 'No assignments found. Create your first assignment above.' : 'No assignments match your search.'}</div>
           ) : (
-            <table>
+            <table style={{ fontSize: '0.85rem' }}>
               <thead>
                 <tr>
-                  <th>Employee</th>
+                  <th style={{ minWidth: '180px' }}>Employee</th>
                   <th>ID</th>
                   <th>Department</th>
-                  <th>Designation</th>
-                  <th>Sub Location</th>
-                  <th>Org. Location</th>
+                  <th>Location</th>
                   <th>Assets Assigned</th>
-                  <th>Licenses Assigned</th>
-                  <th>Date</th>
-                  {isAdminOrManager && <th>Action</th>}
+                  <th>Licenses</th>
+                  {isAdminOrManager && (
+                    <th style={{ position: 'sticky', right: 0, zIndex: 2, minWidth: '120px' }}>Action</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {filteredAssignments.map((a) => (
                   <tr key={a.id} style={editingId === a.id ? { background: '#fef9c3' } : {}}>
                     <td>
-                      <div>{a.empName}</div>
-                      {a.empEmail && <div style={{ fontSize: '0.75rem', color: '#999' }}>{a.empEmail}</div>}
+                      <div style={{ fontWeight: 500 }}>{a.empName}</div>
+                      {a.empEmail && <div style={{ fontSize: '0.72rem', color: '#999' }}>{a.empEmail}</div>}
+                      {(a.designation || a.location) && (
+                        <div style={{ fontSize: '0.72rem', color: '#b0b0b0' }}>
+                          {[a.designation, a.location].filter(Boolean).join(' · ')}
+                        </div>
+                      )}
                     </td>
                     <td>{a.empId}</td>
                     <td>{a.department?.name || '-'}</td>
-                    <td>{a.designation || '-'}</td>
-                    <td>{a.location || '-'}</td>
                     <td>{a.orgLocationName || '-'}</td>
                     <td>
                       {a.assets && a.assets.length > 0
                         ? a.assets.map((aa, i) => (
-                            <span key={i} className="status-badge status-active" style={{ marginRight: '5px', marginBottom: '3px' }}>
+                            <span key={i} className="status-badge status-active" style={{ marginRight: '4px', marginBottom: '2px', fontSize: '0.75rem' }}>
                               {aa.asset?.name || '-'}{aa.asset?.serialNo ? ` (${aa.asset.serialNo})` : ''}
                             </span>
                           ))
-                        : <span style={{ color: '#999' }}>None</span>}
+                        : <span style={{ color: '#999' }}>-</span>}
                     </td>
                     <td>
                       {a.licenses && a.licenses.length > 0
                         ? a.licenses.map((al, i) => (
-                            <span key={i} className="status-badge status-pending" style={{ marginRight: '5px', marginBottom: '3px' }}>
+                            <span key={i} className="status-badge status-pending" style={{ marginRight: '4px', marginBottom: '2px', fontSize: '0.75rem' }}>
                               {al.license?.name || '-'}
                             </span>
                           ))
-                        : <span style={{ color: '#999' }}>None</span>}
+                        : <span style={{ color: '#999' }}>-</span>}
                     </td>
-                    <td>{formatDate(a.assignDate)}</td>
                     {isAdminOrManager && (
-                      <td>
-                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap' }}>
+                      <td style={{ position: 'sticky', right: 0, background: editingId === a.id ? '#fef9c3' : '#fff', zIndex: 1, boxShadow: '-4px 0 8px rgba(0,0,0,0.06)' }}>
+                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'nowrap' }}>
                           <button
                             className="btn btn-primary"
-                            style={{ padding: '5px 12px', fontSize: '0.78rem' }}
+                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}
                             onClick={() => handleEdit(a)}
                           >
                             Edit
                           </button>
-                          {isAdmin && (
-                            <button
-                              className="btn btn-danger"
-                              style={{ padding: '5px 12px', fontSize: '0.78rem' }}
-                              onClick={() => handleRemove(a.id, a.empName)}
-                            >
-                              Remove
-                            </button>
-                          )}
+                          <button
+                            className="btn btn-danger"
+                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                            onClick={() => handleRemove(a.id, a.empName)}
+                          >
+                            Remove
+                          </button>
                         </div>
                       </td>
                     )}
@@ -578,45 +567,6 @@ function Assignments({ showAlert, user }) {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '20px', flexWrap: 'wrap' }}>
-          <button
-            className="btn-outline"
-            style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #cbd5e1', background: page === 1 ? '#f1f5f9' : '#fff', cursor: page === 1 ? 'default' : 'pointer', fontSize: '0.85rem', color: page === 1 ? '#94a3b8' : '#334155' }}
-            disabled={page === 1}
-            onClick={() => setPage(1)}
-          >
-            First
-          </button>
-          <button
-            className="btn-outline"
-            style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #cbd5e1', background: page === 1 ? '#f1f5f9' : '#fff', cursor: page === 1 ? 'default' : 'pointer', fontSize: '0.85rem', color: page === 1 ? '#94a3b8' : '#334155' }}
-            disabled={page === 1}
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-          >
-            Prev
-          </button>
-          <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600, padding: '0 8px' }}>
-            Page {page} of {totalPages}
-          </span>
-          <button
-            className="btn-outline"
-            style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #cbd5e1', background: page === totalPages ? '#f1f5f9' : '#fff', cursor: page === totalPages ? 'default' : 'pointer', fontSize: '0.85rem', color: page === totalPages ? '#94a3b8' : '#334155' }}
-            disabled={page === totalPages}
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-          >
-            Next
-          </button>
-          <button
-            className="btn-outline"
-            style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #cbd5e1', background: page === totalPages ? '#f1f5f9' : '#fff', cursor: page === totalPages ? 'default' : 'pointer', fontSize: '0.85rem', color: page === totalPages ? '#94a3b8' : '#334155' }}
-            disabled={page === totalPages}
-            onClick={() => setPage(totalPages)}
-          >
-            Last
-          </button>
-        </div>
-      )}
     </div>
   );
 }

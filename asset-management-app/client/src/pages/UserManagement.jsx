@@ -119,6 +119,7 @@ export default function UserManagement({ showAlert, user }) {
     try {
       await usersApi.update(editId, {
         ...editForm,
+        email: editForm.email.trim() || null,
         locationIds: editForm.locationIds,
       });
       showAlert('User updated successfully');
@@ -205,7 +206,7 @@ export default function UserManagement({ showAlert, user }) {
                 name="fullName"
                 value={registerForm.fullName}
                 onChange={handleRegisterChange}
-                placeholder="e.g. John Smith"
+                placeholder="e.g. Dipesh Mondal"
                 required
               />
             </div>
@@ -216,7 +217,7 @@ export default function UserManagement({ showAlert, user }) {
                 name="email"
                 value={registerForm.email}
                 onChange={handleRegisterChange}
-                placeholder="e.g. john@company.com"
+                placeholder="e.g. dipesh.mondal@balasorealloys.com"
               />
             </div>
             <div className="form-group">
@@ -274,24 +275,24 @@ export default function UserManagement({ showAlert, user }) {
       </div>
 
       {/* Users Table */}
-      <div className="table-container">
-        <div className="table-scroll">
+      <div className="table-container" style={{ width: '100%', overflowX: 'auto' }}>
+        <div style={{ width: '100%' }}>
           {loading ? (
             <div className="loading">Loading users...</div>
           ) : users.length === 0 ? (
             <div className="empty-state">No users found</div>
           ) : (
-            <table>
+            <table style={{ width: '100%', tableLayout: 'auto' }}>
               <thead>
                 <tr>
-                  <th>Employee ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Locations</th>
-                  <th>Status</th>
-                  <th>Last Login</th>
-                  <th>Actions</th>
+                  <th style={{ minWidth: '90px' }}>Employee ID</th>
+                  <th style={{ minWidth: '140px' }}>Name</th>
+                  <th style={{ minWidth: '180px' }}>Email</th>
+                  <th style={{ minWidth: '80px' }}>Role</th>
+                  <th style={{ minWidth: '120px' }}>Locations</th>
+                  <th style={{ minWidth: '70px' }}>Status</th>
+                  <th style={{ minWidth: '100px' }}>Last Login</th>
+                  <th style={{ minWidth: '220px', position: 'sticky', right: 0, zIndex: 2 }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -332,7 +333,7 @@ export default function UserManagement({ showAlert, user }) {
                       </span>
                     </td>
                     <td>{formatDate(u.lastLogin)}</td>
-                    <td>
+                    <td style={{ position: 'sticky', right: 0, background: '#fff', zIndex: 1 }}>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap', alignItems: 'center' }}>
                         <button className="btn btn-edit" style={{ padding: '5px 12px', fontSize: '0.78rem', whiteSpace: 'nowrap' }} onClick={() => openEdit(u)}>Edit</button>
                         <button

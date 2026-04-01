@@ -382,7 +382,7 @@ export default function AssetHub({ showAlert, user, externalCategoryFilter, acti
           </div>
           {importResult.errors?.length > 0 && (
             <ul className="result-errors">
-              {importResult.errors.slice(0, 5).map((err, i) => <li key={i}>{err}</li>)}
+              {importResult.errors.slice(0, 5).map((err, i) => <li key={i}>{typeof err === 'string' ? err : `Row ${err.row}: ${err.reason}`}</li>)}
               {importResult.errors.length > 5 && <li>...and {importResult.errors.length - 5} more</li>}
             </ul>
           )}

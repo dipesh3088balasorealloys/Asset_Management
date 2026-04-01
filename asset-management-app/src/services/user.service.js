@@ -77,7 +77,7 @@ async function updateUser(id, data) {
     id,
     data.fullName !== undefined ? data.fullName : null,
     data.employeeId !== undefined ? data.employeeId : null,
-    data.email !== undefined ? data.email : null,
+    data.email !== undefined ? (data.email || null) : null,
     data.role !== undefined ? data.role : null,
     data.isActive !== undefined ? data.isActive : null,
   ]);

@@ -190,10 +190,6 @@ export default function Login({ onLogin }) {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-
-          <p style={{ textAlign: 'center', color: '#bbb', fontSize: '0.78rem', marginTop: 24 }}>
-            Default: 3088 / admin123
-          </p>
         </div>
 
         <p style={{

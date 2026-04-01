@@ -79,7 +79,7 @@
     .er-table { border: 2px solid #e2e8f0; border-radius: 10px; overflow: hidden; transition: all 0.2s; }
     .er-table:hover { border-color: #3b82f6; box-shadow: 0 4px 16px rgba(59,130,246,0.15); }
     .er-table-name { background: #1e293b; color: white; padding: 10px 14px; font-weight: 700; font-size: 13px; display: flex; justify-content: space-between; }
-    .er-table-name .rows { background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 10px; font-size: 11px; }
+    .er-table-name .rows { display: none; }
     .er-col { padding: 5px 14px; font-size: 12px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
     .er-col:last-child { border-bottom: none; }
     .er-col .pk { color: #f59e0b; font-weight: 800; font-size: 10px; }
@@ -114,6 +114,22 @@
     .arch-box.external { background: #ede9fe; color: #7c3aed; border: 2px solid #c4b5fd; }
     .arch-sub { font-size: 10px; font-weight: 400; opacity: 0.7; margin-top: 4px; }
 
+    /* Workflow Diagram */
+    .workflow-container { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .workflow-row { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; margin-bottom: 16px; }
+    .workflow-row:last-child { margin-bottom: 0; }
+    .wf-box { padding: 14px 20px; border-radius: 10px; font-weight: 700; font-size: 12px; text-align: center; min-width: 130px; position: relative; }
+    .wf-box .wf-sub { font-size: 10px; font-weight: 400; opacity: 0.7; margin-top: 3px; }
+    .wf-arrow { font-size: 20px; color: #94a3b8; padding: 0 6px; }
+    .wf-arrow-down { display: flex; justify-content: center; font-size: 20px; color: #94a3b8; margin: 4px 0; }
+    .wf-login { background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; }
+    .wf-dash { background: #dbeafe; color: #1d4ed8; border: 2px solid #93c5fd; }
+    .wf-core { background: #d1fae5; color: #059669; border: 2px solid #6ee7b7; }
+    .wf-admin { background: #fef3c7; color: #d97706; border: 2px solid #fcd34d; }
+    .wf-infra { background: #ede9fe; color: #7c3aed; border: 2px solid #c4b5fd; }
+    .wf-report { background: #ccfbf1; color: #0d9488; border: 2px solid #5eead4; }
+    .wf-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; font-weight: 700; margin: 20px 0 10px; text-align: center; }
+
     /* Print */
     @media print { .nav, .header { position: static; } }
 
@@ -132,8 +148,7 @@
   <div class="header-meta">
     <span>Balasore Alloys Ltd.</span>
     <span>Version 1.0</span>
-    <span>Generated: March 12, 2026</span>
-    <span>Server: 192.168.3.62:3306</span>
+    <span>Server: 192.168.10.30:5174</span>
     <span>Database: asset_mgmt</span>
   </div>
 </div>
@@ -142,10 +157,11 @@
 <div class="nav" id="nav">
   <a href="#overview" class="active">Overview</a>
   <a href="#architecture">Architecture</a>
+  <a href="#workflow">Workflow</a>
   <a href="#tables">Tables (17)</a>
   <a href="#er-diagram">ER Diagram</a>
   <a href="#stored-procedures">Stored Procedures (18)</a>
-  <a href="#api-routes">API Routes (65+)</a>
+  <a href="#api-routes">API Routes (70+)</a>
   <a href="#locations">Locations &amp; Data</a>
 </div>
 
@@ -157,10 +173,7 @@
     <div class="stats-grid">
       <div class="stat-card blue"><div class="stat-number">17</div><div class="stat-label">Database Tables</div></div>
       <div class="stat-card green"><div class="stat-number">18</div><div class="stat-label">Stored Procedures</div></div>
-      <div class="stat-card orange"><div class="stat-number">65+</div><div class="stat-label">API Endpoints</div></div>
-      <div class="stat-card purple"><div class="stat-number">295</div><div class="stat-label">Total Assets</div></div>
-      <div class="stat-card red"><div class="stat-number">281</div><div class="stat-label">Assignments</div></div>
-      <div class="stat-card teal"><div class="stat-number">4</div><div class="stat-label">Locations</div></div>
+      <div class="stat-card orange"><div class="stat-number">70+</div><div class="stat-label">API Endpoints</div></div>
     </div>
 
     <div class="table-wrapper">
@@ -181,9 +194,9 @@
   <div id="architecture" class="section">
     <div class="section-title"><div class="icon green">🏗️</div> System Architecture</div>
     <div class="arch-flow">
-      <div class="arch-box frontend">React 19<div class="arch-sub">Port 5173 (Vite)</div></div>
+      <div class="arch-box frontend">React 19<div class="arch-sub">Port 5174 (Vite)</div></div>
       <div class="arch-arrow">→</div>
-      <div class="arch-box backend">Express API<div class="arch-sub">Port 3000</div></div>
+      <div class="arch-box backend">Express API<div class="arch-sub">Port 3001</div></div>
       <div class="arch-arrow">→</div>
       <div class="arch-box database">MySQL 8.0<div class="arch-sub">192.168.3.62:3306<br>asset_mgmt</div></div>
       <div class="arch-arrow">←→</div>
@@ -194,8 +207,76 @@
       <table>
         <tr><th>Role</th><th>Permissions</th><th>Access Level</th></tr>
         <tr><td><span class="badge badge-red">admin</span></td><td>Full CRUD on all modules, user management, audit log access, delete operations</td><td>All pages + User Management</td></tr>
-        <tr><td><span class="badge badge-orange">manager</span></td><td>Create/Update on all modules, import data, export reports</td><td>All pages except User Management</td></tr>
+        <tr><td><span class="badge badge-orange">manager</span></td><td>Create/Update/Remove on all modules, import data, export reports</td><td>All pages except User Management &amp; Audit Log</td></tr>
         <tr><td><span class="badge badge-gray">viewer</span></td><td>Read-only access to all data, export reports</td><td>All pages (read-only)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== WORKFLOW ==================== -->
+  <div id="workflow" class="section">
+    <div class="section-title"><div class="icon purple">🔄</div> Application Workflow</div>
+
+    <div class="workflow-container">
+      <!-- Entry Point -->
+      <div class="wf-section-label">Entry Point</div>
+      <div class="workflow-row">
+        <div class="wf-box wf-login">User Login<div class="wf-sub">JWT Authentication<br>Role: Admin / Manager / Viewer</div></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-box wf-dash">Dashboard<div class="wf-sub">Asset Stats, Charts<br>Location Distribution</div></div>
+      </div>
+
+      <div class="wf-arrow-down">↓</div>
+
+      <!-- Core Modules -->
+      <div class="wf-section-label">Core Asset Management Modules</div>
+      <div class="workflow-row">
+        <div class="wf-box wf-core">Asset Hub<div class="wf-sub">Add / Edit / Delete<br>Import CSV/Excel</div></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-box wf-core">Assign Assets<div class="wf-sub">Employee ↔ Asset Mapping<br>Email Notification</div></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-box wf-core">License Center<div class="wf-sub">Software Licenses<br>Expiry Tracking</div></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-box wf-core">Services<div class="wf-sub">IT Subscriptions<br>Cost Analysis</div></div>
+      </div>
+
+      <div class="wf-arrow-down">↓</div>
+
+      <!-- Supporting Modules -->
+      <div class="wf-section-label">Supporting Modules</div>
+      <div class="workflow-row">
+        <div class="wf-box wf-infra">E-Waste<div class="wf-sub">Disposal Records<br>Photo Attachments</div></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-box wf-infra">Backup Mgmt<div class="wf-sub">DB / Server / Employee<br>Schedule Tracking</div></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-box wf-report">Reports<div class="wf-sub">Asset Utilization, Costs<br>Location Summary, Export</div></div>
+      </div>
+
+      <div class="wf-arrow-down">↓</div>
+
+      <!-- Admin & Audit -->
+      <div class="wf-section-label">Administration (Admin Only)</div>
+      <div class="workflow-row">
+        <div class="wf-box wf-admin">User Management<div class="wf-sub">Create / Edit Users<br>Role Assignment</div></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-box wf-admin">Audit Log<div class="wf-sub">All System Actions<br>Change History (JSON)</div></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-box wf-login">SMTP Emails<div class="wf-sub">Assignment Alerts<br>Office 365 Integration</div></div>
+      </div>
+    </div>
+
+    <!-- Data Flow Summary -->
+    <div class="table-wrapper">
+      <div class="table-title">Data Flow Summary</div>
+      <table>
+        <tr><th>Flow</th><th>From</th><th>To</th><th>Description</th></tr>
+        <tr><td><span class="badge badge-blue">Auth</span></td><td>React Login Form</td><td>Express /api/auth/login</td><td>JWT token issued on success, stored in localStorage, sent via Authorization header</td></tr>
+        <tr><td><span class="badge badge-green">Asset CRUD</span></td><td>Asset Hub Page</td><td>MySQL via Stored Procedures</td><td>All asset operations go through <code>asset_list</code> SP with pagination, search, filters</td></tr>
+        <tr><td><span class="badge badge-green">Assignment</span></td><td>Assign Assets Page</td><td><code>assignment_create</code> SP</td><td>Creates assignment + links assets in single transaction, updates stock counts, sends email</td></tr>
+        <tr><td><span class="badge badge-purple">SAP Lookup</span></td><td>Assignment Form</td><td>balcorpdb (READ-ONLY)</td><td>Employee search auto-fills name, department, email from corporate SAP database</td></tr>
+        <tr><td><span class="badge badge-orange">Import</span></td><td>CSV/Excel Upload</td><td>Bulk Insert via API</td><td>Validates rows, creates assets/licenses/services, returns imported + skipped + errors</td></tr>
+        <tr><td><span class="badge badge-teal">Export</span></td><td>Any Module</td><td>CSV / Excel / PDF Download</td><td>Server-side generation with proper formatting, column definitions per entity</td></tr>
+        <tr><td><span class="badge badge-red">Audit</span></td><td>All CRUD Operations</td><td><code>audit_log</code> Table</td><td>Automatic logging of old/new JSON values for every create, update, delete, assign action</td></tr>
       </table>
     </div>
   </div>
@@ -208,39 +289,39 @@
     <div class="table-wrapper">
       <div class="table-title">Core Business Tables <span class="badge">7 tables</span></div>
       <table>
-        <tr><th style="width:180px">Table</th><th style="width:70px">Rows</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
+        <tr><th style="width:180px">Table</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
         <tr>
-          <td><code>assets</code></td><td><strong>295</strong></td>
-          <td>Master table for all IT assets (laptops, desktops, etc.). Tracks inventory, location, vendor, pricing, warranty. Supports soft delete via <code>is_deleted</code>.</td>
+          <td><code>assets</code></td>
+          <td>Master table for all IT assets across 15 categories (Laptop, Desktop, Printer, Projector, Tab, I-pad, Switch, AccessPoint, VideoConference, CCTV, Dome Camera, Bullet Camera, PTZ Camera, Cube Camera, FRS). Tracks inventory, location, vendor, pricing, warranty. Supports soft delete via <code>is_deleted</code>.</td>
           <td>id, category, name, serial_no, quantity, assigned, available, vendor, location_id, price</td>
         </tr>
         <tr>
-          <td><code>assignments</code></td><td><strong>281</strong></td>
+          <td><code>assignments</code></td>
           <td>Tracks which employee has been assigned assets/licenses. Links to departments and locations. Each assignment can have multiple assets via <code>assignment_assets</code>.</td>
           <td>id, emp_name, emp_id, department_id, emp_email, location_id, assign_date, is_active</td>
         </tr>
         <tr>
-          <td><code>assignment_assets</code></td><td><strong>286</strong></td>
+          <td><code>assignment_assets</code></td>
           <td>Junction/bridge table linking assignments to assets (many-to-many). One employee can have multiple assets, one asset belongs to one active assignment.</td>
           <td>assignment_id → assignments.id, asset_id → assets.id, quantity</td>
         </tr>
         <tr>
-          <td><code>assignment_licenses</code></td><td><strong>0</strong></td>
+          <td><code>assignment_licenses</code></td>
           <td>Junction table linking assignments to software licenses (many-to-many). Tracks which licenses are assigned to which employee.</td>
           <td>assignment_id → assignments.id, license_id → licenses.id, quantity</td>
         </tr>
         <tr>
-          <td><code>licenses</code></td><td><strong>0</strong></td>
+          <td><code>licenses</code></td>
           <td>Manages software license inventory. Tracks license keys, vendor, validity period, usage count. Supports expiry alerts.</td>
           <td>id, name, quantity, used, available, license_key, start_date, end_date, vendor</td>
         </tr>
         <tr>
-          <td><code>services</code></td><td><strong>0</strong></td>
+          <td><code>services</code></td>
           <td>IT services &amp; subscriptions (SaaS, Cloud, Maintenance, etc.). Tracks cost, billing cycle, contract period for cost analysis.</td>
           <td>id, type (enum), name, provider, cost, status, billing_cycle, start_date, end_date</td>
         </tr>
         <tr>
-          <td><code>ewaste</code></td><td><strong>1</strong></td>
+          <td><code>ewaste</code></td>
           <td>E-waste disposal records. Tracks disposed assets, billing, vendor, cost, and reason. Linked to photos via <code>ewaste_photos</code>.</td>
           <td>id, title, billing_number, asset_names (JSON), disposal_date, disposed_to, disposal_cost</td>
         </tr>
@@ -251,19 +332,19 @@
     <div class="table-wrapper">
       <div class="table-title">Reference &amp; Lookup Tables <span class="badge">3 tables</span></div>
       <table>
-        <tr><th style="width:180px">Table</th><th style="width:70px">Rows</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
+        <tr><th style="width:180px">Table</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
         <tr>
-          <td><code>locations</code></td><td><strong>4</strong></td>
+          <td><code>locations</code></td>
           <td>Plant/office locations. Each asset and assignment is linked to a location. Used for location-based filtering across the app.</td>
           <td>id, name, code (unique), is_active</td>
         </tr>
         <tr>
-          <td><code>departments</code></td><td><strong>64</strong></td>
-          <td>Department master list. Used in assignments for categorization. Auto-created during data import.</td>
+          <td><code>departments</code></td>
+          <td>Department master list (101 departments across 4 locations). Used in assignments for categorization. Auto-created during data import.</td>
           <td>id, name (unique)</td>
         </tr>
         <tr>
-          <td><code>user_locations</code></td><td><strong>1</strong></td>
+          <td><code>user_locations</code></td>
           <td>Junction table restricting which locations a user (manager/viewer) can access. Admins bypass this restriction.</td>
           <td>user_id → users.id, location_id → locations.id</td>
         </tr>
@@ -274,24 +355,24 @@
     <div class="table-wrapper">
       <div class="table-title">System &amp; Audit Tables <span class="badge">4 tables</span></div>
       <table>
-        <tr><th style="width:180px">Table</th><th style="width:70px">Rows</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
+        <tr><th style="width:180px">Table</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
         <tr>
-          <td><code>users</code></td><td><strong>5</strong></td>
+          <td><code>users</code></td>
           <td>Application users with hashed passwords. Three roles: admin, manager, viewer. Tracks last login time.</td>
           <td>id, employee_id, email, password_hash, full_name, role (enum), is_active</td>
         </tr>
         <tr>
-          <td><code>audit_log</code></td><td><strong>7</strong></td>
+          <td><code>audit_log</code></td>
           <td>Immutable audit trail of all system actions. Logs CREATE, UPDATE, DELETE, ASSIGN, UNASSIGN, IMPORT, LOGIN with old/new JSON values.</td>
           <td>id, user_id, action (enum), entity_type, entity_id, old_values (JSON), new_values (JSON)</td>
         </tr>
         <tr>
-          <td><code>email_log</code></td><td><strong>0</strong></td>
+          <td><code>email_log</code></td>
           <td>Tracks all outbound emails sent by the system (assignment notifications, alerts). Logs delivery status and errors.</td>
           <td>id, to_email, subject, template, status, error</td>
         </tr>
         <tr>
-          <td><code>ewaste_photos</code></td><td><strong>0</strong></td>
+          <td><code>ewaste_photos</code></td>
           <td>Photo attachments for e-waste disposal records. Supports multiple photos per record with type classification.</td>
           <td>id, ewaste_id → ewaste.id, file_path, photo_type, original_name</td>
         </tr>
@@ -302,19 +383,19 @@
     <div class="table-wrapper">
       <div class="table-title">Backup &amp; Recovery Tables <span class="badge">3 tables</span></div>
       <table>
-        <tr><th style="width:180px">Table</th><th style="width:70px">Rows</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
+        <tr><th style="width:180px">Table</th><th>Purpose &amp; Use Case</th><th>Key Columns</th></tr>
         <tr>
-          <td><code>db_backups</code></td><td><strong>1</strong></td>
+          <td><code>db_backups</code></td>
           <td>Database backup schedule tracking. Records backup type, schedule, status, size, and responsible person.</td>
           <td>id, database_name, db_engine, backup_type, backup_schedule, last_backup_status, backup_size_gb</td>
         </tr>
         <tr>
-          <td><code>server_backups</code></td><td><strong>1</strong></td>
+          <td><code>server_backups</code></td>
           <td>Server backup tracking. Monitors server-level backup schedules, storage paths, and backup health.</td>
           <td>id, server_name, server_ip, backup_type, backup_schedule, last_backup_status</td>
         </tr>
         <tr>
-          <td><code>employee_backups</code></td><td><strong>2</strong></td>
+          <td><code>employee_backups</code></td>
           <td>Employee data backup records (email, OneDrive, desktop/laptop). Tracks which backups are completed per employee.</td>
           <td>id, email_id, user_name, email_backup, onedrive_backup, desktop_laptop_backup, disk_name</td>
         </tr>
@@ -330,7 +411,7 @@
       <div class="er-grid">
         <!-- assets -->
         <div class="er-table">
-          <div class="er-table-name">assets <span class="rows">295 rows</span></div>
+          <div class="er-table-name">assets</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span>category</span><span class="type">varchar(50)</span></div>
           <div class="er-col"><span>name</span><span class="type">varchar(191)</span></div>
@@ -344,7 +425,7 @@
 
         <!-- assignments -->
         <div class="er-table">
-          <div class="er-table-name">assignments <span class="rows">281 rows</span></div>
+          <div class="er-table-name">assignments</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span>emp_name / emp_id</span><span class="type">varchar(191)</span></div>
           <div class="er-col"><span><span class="fk">FK</span> department_id</span><span class="type">→ departments.id</span></div>
@@ -357,7 +438,7 @@
 
         <!-- assignment_assets -->
         <div class="er-table">
-          <div class="er-table-name">assignment_assets <span class="rows">286 rows</span></div>
+          <div class="er-table-name">assignment_assets</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span><span class="fk">FK</span> assignment_id</span><span class="type">→ assignments.id</span></div>
           <div class="er-col"><span><span class="fk">FK</span> asset_id</span><span class="type">→ assets.id</span></div>
@@ -366,7 +447,7 @@
 
         <!-- locations -->
         <div class="er-table">
-          <div class="er-table-name">locations <span class="rows">4 rows</span></div>
+          <div class="er-table-name">locations</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span>name</span><span class="type">varchar(100) UNIQUE</span></div>
           <div class="er-col"><span>code</span><span class="type">varchar(10) UNIQUE</span></div>
@@ -375,14 +456,14 @@
 
         <!-- departments -->
         <div class="er-table">
-          <div class="er-table-name">departments <span class="rows">64 rows</span></div>
+          <div class="er-table-name">departments</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span>name</span><span class="type">varchar(191) UNIQUE</span></div>
         </div>
 
         <!-- users -->
         <div class="er-table">
-          <div class="er-table-name">users <span class="rows">5 rows</span></div>
+          <div class="er-table-name">users</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span>employee_id</span><span class="type">varchar(50) UNIQUE</span></div>
           <div class="er-col"><span>email</span><span class="type">varchar(191) UNIQUE</span></div>
@@ -393,7 +474,7 @@
 
         <!-- audit_log -->
         <div class="er-table">
-          <div class="er-table-name">audit_log <span class="rows">7 rows</span></div>
+          <div class="er-table-name">audit_log</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span><span class="fk">FK</span> user_id</span><span class="type">→ users.id</span></div>
           <div class="er-col"><span>action</span><span class="type">enum(7 types)</span></div>
@@ -403,7 +484,7 @@
 
         <!-- licenses -->
         <div class="er-table">
-          <div class="er-table-name">licenses <span class="rows">0 rows</span></div>
+          <div class="er-table-name">licenses</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span>name / vendor</span><span class="type">varchar(191)</span></div>
           <div class="er-col"><span>quantity / used / available</span><span class="type">int</span></div>
@@ -413,7 +494,7 @@
 
         <!-- services -->
         <div class="er-table">
-          <div class="er-table-name">services <span class="rows">0 rows</span></div>
+          <div class="er-table-name">services</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span>type</span><span class="type">enum(8 types)</span></div>
           <div class="er-col"><span>name / provider</span><span class="type">varchar(191)</span></div>
@@ -423,7 +504,7 @@
 
         <!-- ewaste -->
         <div class="er-table">
-          <div class="er-table-name">ewaste <span class="rows">1 row</span></div>
+          <div class="er-table-name">ewaste</div>
           <div class="er-col"><span><span class="pk">PK</span> id</span><span class="type">int</span></div>
           <div class="er-col"><span>title</span><span class="type">varchar(255)</span></div>
           <div class="er-col"><span>asset_names</span><span class="type">JSON</span></div>
@@ -623,7 +704,7 @@
 
   <!-- ==================== API ROUTES ==================== -->
   <div id="api-routes" class="section">
-    <div class="section-title"><div class="icon teal">🌐</div> API Routes (65+ Endpoints)</div>
+    <div class="section-title"><div class="icon teal">🌐</div> API Routes (70+ Endpoints)</div>
 
     <div class="table-wrapper" style="padding: 20px;">
       <!-- Auth -->
@@ -750,56 +831,10 @@
     </div>
   </div>
 
-  <!-- ==================== LOCATIONS ==================== -->
-  <div id="locations" class="section">
-    <div class="section-title"><div class="icon green">📍</div> Location &amp; Data Summary</div>
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <div class="stat-number">162</div>
-        <div class="stat-label">Balasore Plant (BAL)</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-number">46</div>
-        <div class="stat-label">Kolkata Head Office (KOL)</div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-number">26</div>
-        <div class="stat-label">Sukinda Plant (SUK)</div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-number">61</div>
-        <div class="stat-label">Kaliapani Mines (MINES)</div>
-      </div>
-    </div>
-
-    <div class="table-wrapper">
-      <div class="table-title">Locations</div>
-      <table>
-        <tr><th>ID</th><th>Name</th><th>Code</th><th>Assets</th><th>Status</th></tr>
-        <tr><td>1</td><td>Balasore Plant</td><td>BAL</td><td>162</td><td><span class="badge badge-green">Active</span></td></tr>
-        <tr><td>2</td><td>Kolkata Head Office</td><td>KOL</td><td>46</td><td><span class="badge badge-green">Active</span></td></tr>
-        <tr><td>3</td><td>Sukinda Plant</td><td>SUK</td><td>26</td><td><span class="badge badge-green">Active</span></td></tr>
-        <tr><td>4</td><td>Kaliapani Mines</td><td>MINES</td><td>61</td><td><span class="badge badge-green">Active</span></td></tr>
-      </table>
-    </div>
-
-    <div class="table-wrapper">
-      <div class="table-title">Enum Values Used in Database</div>
-      <table>
-        <tr><th>Table.Column</th><th>Enum Values</th></tr>
-        <tr><td><code>users.role</code></td><td><span class="badge badge-red">admin</span> <span class="badge badge-orange">manager</span> <span class="badge badge-gray">viewer</span></td></tr>
-        <tr><td><code>audit_log.action</code></td><td><span class="badge badge-blue">CREATE</span> <span class="badge badge-orange">UPDATE</span> <span class="badge badge-red">DELETE</span> <span class="badge badge-green">ASSIGN</span> <span class="badge badge-purple">UNASSIGN</span> <span class="badge badge-teal">IMPORT</span> <span class="badge badge-gray">LOGIN</span></td></tr>
-        <tr><td><code>services.type</code></td><td>SaaS, Cloud, Maintenance, Support, Consulting, Hosting, Security, Other</td></tr>
-        <tr><td><code>services.status</code></td><td><span class="badge badge-green">Active</span> <span class="badge badge-orange">Pending</span> <span class="badge badge-red">Cancelled</span></td></tr>
-        <tr><td><code>services.billing_cycle</code></td><td>Monthly, Quarterly, Yearly, OneTime</td></tr>
-      </table>
-    </div>
-  </div>
-
   <!-- Footer -->
   <div style="text-align: center; padding: 40px 0; color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; margin-top: 20px;">
     <strong>BAL Connect — Asset Management System</strong><br>
-    Balasore Alloys Ltd. &copy; 2026 | Documentation generated on March 12, 2026<br>
+    Balasore Alloys Ltd. &copy; 2026 | Documentation generated on April 1, 2026<br>
     Database: asset_mgmt @ 192.168.3.62:3306 | Backend: Express.js | Frontend: React 19
   </div>
 

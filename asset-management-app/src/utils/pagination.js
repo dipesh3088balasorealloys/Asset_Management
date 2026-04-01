@@ -1,5 +1,5 @@
 const DEFAULT_PAGE_SIZE = parseInt(process.env.DEFAULT_PAGE_SIZE) || 20;
-const MAX_PAGE_SIZE = parseInt(process.env.MAX_PAGE_SIZE) || 100;
+const MAX_PAGE_SIZE = parseInt(process.env.MAX_PAGE_SIZE) || 1000;
 
 function parsePagination(query) {
   let page = parseInt(query.page) || 1;
