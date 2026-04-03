@@ -10,7 +10,7 @@ async function listEwaste(q) {
   const sortField = q.sort   || 'created_at';
   const sortDir   = q.order  || 'desc';
 
-  const sets = await callProcMulti('ewaste_list', [
+  const sets = await callProcMulti('SP_ASSET_EWASTE_LIST', [
     search, sortField, sortDir, page, limit,
   ]);
 
@@ -21,7 +21,7 @@ async function listEwaste(q) {
 }
 
 async function getEwaste(id) {
-  const sets = await callProcMulti('ewaste_get', [id]);
+  const sets = await callProcMulti('SP_ASSET_EWASTE_GET', [id]);
 
   const records = sets[0] || [];
   if (!records.length) {
@@ -43,7 +43,7 @@ async function createEwaste(data, userId) {
   const assetNamesJson = assetNames ? JSON.stringify(assetNames) : JSON.stringify([]);
 
   const result = await query(
-    `INSERT INTO ewaste
+    `INSERT INTO asset_ewaste
        (title, billing_number, asset_names, disposal_date, disposed_to,
         disposal_cost, reason, remarks, created_by)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -60,7 +60,7 @@ async function createEwaste(data, userId) {
     ]
   );
 
-  const rows = await query('SELECT * FROM ewaste WHERE id = ?', [result.insertId]);
+  const rows = await query('SELECT * FROM asset_ewaste WHERE id = ?', [result.insertId]);
   return rows[0];
 }
 
@@ -78,7 +78,7 @@ async function updateEwaste(id, data) {
   }
 
   await query(
-    `UPDATE ewaste SET
+    `UPDATE asset_ewaste SET
        title = ?, billing_number = ?, asset_names = ?, disposal_date = ?,
        disposed_to = ?, disposal_cost = ?, reason = ?, remarks = ?
      WHERE id = ? AND is_deleted = 0`,
@@ -95,32 +95,32 @@ async function updateEwaste(id, data) {
     ]
   );
 
-  const rows = await query('SELECT * FROM ewaste WHERE id = ?', [id]);
+  const rows = await query('SELECT * FROM asset_ewaste WHERE id = ?', [id]);
   return rows[0];
 }
 
 async function deleteEwaste(id) {
   await getEwaste(id);
-  await query('UPDATE ewaste SET is_deleted = 1 WHERE id = ? AND is_deleted = 0', [id]);
+  await query('UPDATE asset_ewaste SET is_deleted = 1 WHERE id = ? AND is_deleted = 0', [id]);
   return { message: 'E-Waste record deleted successfully' };
 }
 
 async function addPhoto(ewasteId, filePath, photoType, originalName) {
-  // Verify ewaste record exists
-  await query('SELECT id FROM ewaste WHERE id = ? AND is_deleted = 0', [ewasteId]);
+  // Verify asset_ewaste record exists
+  await query('SELECT id FROM asset_ewaste WHERE id = ? AND is_deleted = 0', [ewasteId]);
 
   const result = await query(
-    `INSERT INTO ewaste_photos (ewaste_id, file_path, photo_type, original_name)
+    `INSERT INTO asset_ewaste_photos (ewaste_id, file_path, photo_type, original_name)
      VALUES (?, ?, ?, ?)`,
     [ewasteId, filePath, photoType, originalName]
   );
 
-  const rows = await query('SELECT * FROM ewaste_photos WHERE id = ?', [result.insertId]);
+  const rows = await query('SELECT * FROM asset_ewaste_photos WHERE id = ?', [result.insertId]);
   return rows[0];
 }
 
 async function deletePhoto(photoId) {
-  const rows = await query('SELECT * FROM ewaste_photos WHERE id = ?', [photoId]);
+  const rows = await query('SELECT * FROM asset_ewaste_photos WHERE id = ?', [photoId]);
   const photo = rows[0];
 
   if (!photo) {
@@ -129,7 +129,7 @@ async function deletePhoto(photoId) {
     throw err;
   }
 
-  await query('DELETE FROM ewaste_photos WHERE id = ?', [photoId]);
+  await query('DELETE FROM asset_ewaste_photos WHERE id = ?', [photoId]);
 
   if (photo.filePath) {
     try {

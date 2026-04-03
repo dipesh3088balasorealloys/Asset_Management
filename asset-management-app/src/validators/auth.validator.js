@@ -10,6 +10,7 @@ const registerValidator = [
     .isEmail().withMessage('A valid email is required')
     .normalizeEmail(),
   body('password')
+    .optional()
     .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   body('fullName')
     .trim()

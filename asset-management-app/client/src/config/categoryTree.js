@@ -7,7 +7,7 @@
 // All valid leaf categories stored in database
 export const ASSET_CATEGORIES = [
   'AccessPoint', 'Server', 'Desktop',
-  'Laptop', 'iPad', 'Tablet', 'Printer', 'Router', 'Switch',
+  'Laptop', 'iPad', 'Tablet', 'Printer', 'Router', 'Switch', 'Firewall', 'SFP',
   'Projector', 'Scanner', 'CCTV', 'VideoConference',
   'Monitor', 'Keyboard', 'Mouse', 'Headset', 'Webcam', 'DockingStation', 'FRS',
   'Other',
@@ -22,6 +22,8 @@ export const ASSET_CATEGORY_LABELS = {
   Printer: 'Printer',
   Router: 'Router',
   Switch: 'Switch',
+  Firewall: 'Firewall',
+  SFP: 'SFP',
   Projector: 'Projector',
   Scanner: 'Scanner',
   Monitor: 'Monitor',
@@ -41,7 +43,7 @@ export const ASSET_CATEGORY_LABELS = {
 // Categories that require unique serial number (qty always 1)
 // All Assets (IT + Non-IT) need serial; only Components use quantity
 export const SERIAL_REQUIRED_CATEGORIES = [
-  'AccessPoint', 'Server', 'Desktop', 'Laptop', 'iPad', 'Tablet', 'Printer', 'Router', 'Switch',
+  'AccessPoint', 'Server', 'Desktop', 'Laptop', 'iPad', 'Tablet', 'Printer', 'Router', 'Switch', 'Firewall', 'SFP',
   'Projector', 'Scanner', 'CCTV', 'VideoConference',
 ];
 
@@ -77,6 +79,8 @@ export const ASSET_CATEGORY_TREE = [
               { id: 'cat-printer', label: 'Printers', categories: ['Printer'] },
               { id: 'cat-router', label: 'Routers', categories: ['Router'] },
               { id: 'cat-switch', label: 'Switches', categories: ['Switch'] },
+              { id: 'cat-firewall', label: 'Firewall', categories: ['Firewall'] },
+              { id: 'cat-sfp', label: 'SFP', categories: ['SFP'] },
             ],
           },
           {
@@ -175,6 +179,8 @@ export const CATEGORY_OPTGROUPS = [
       { value: 'Printer', label: 'Printer' },
       { value: 'Router', label: 'Router' },
       { value: 'Switch', label: 'Switch' },
+      { value: 'Firewall', label: 'Firewall' },
+      { value: 'SFP', label: 'SFP' },
     ],
   },
   {

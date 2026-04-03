@@ -1,6 +1,6 @@
 const ASSET_CATEGORIES = [
   'AccessPoint', 'Server', 'Desktop',
-  'Laptop', 'iPad', 'Tablet', 'Printer', 'Router', 'Switch',
+  'Laptop', 'iPad', 'Tablet', 'Printer', 'Router', 'Switch', 'Firewall', 'SFP',
   'Projector', 'Scanner', 'CCTV', 'VideoConference',
   'Monitor', 'Keyboard', 'Mouse', 'Headset', 'Webcam', 'DockingStation', 'FRS',
   'Other',
@@ -15,6 +15,8 @@ const ASSET_CATEGORY_LABELS = {
   Printer: 'Printer',
   Router: 'Router',
   Switch: 'Switch',
+  Firewall: 'Firewall',
+  SFP: 'SFP',
   Projector: 'Projector',
   Scanner: 'Scanner',
   Monitor: 'Monitor',
@@ -34,7 +36,7 @@ const ASSET_CATEGORY_LABELS = {
 // Categories that require unique serial number tracking (quantity always 1)
 // All Assets (IT + Non-IT) need serial; only Components use quantity
 const SERIAL_REQUIRED_CATEGORIES = [
-  'AccessPoint', 'Server', 'Desktop', 'Laptop', 'iPad', 'Tablet', 'Printer', 'Router', 'Switch',
+  'AccessPoint', 'Server', 'Desktop', 'Laptop', 'iPad', 'Tablet', 'Printer', 'Router', 'Switch', 'Firewall', 'SFP',
   'Projector', 'Scanner', 'CCTV', 'VideoConference',
 ];
 

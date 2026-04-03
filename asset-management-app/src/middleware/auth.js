@@ -28,7 +28,7 @@ async function auth(req, res, next) {
       });
     }
 
-    const rows = await query(`SELECT ${USER_COLS} FROM users WHERE id = ?`, [decoded.userId]);
+    const rows = await query(`SELECT ${USER_COLS} FROM asset_users WHERE id = ?`, [decoded.userId]);
     const user = rows[0];
 
     if (!user) {
@@ -51,7 +51,7 @@ async function auth(req, res, next) {
       user.locationIds = null; // null = no filter
     } else {
       const locationRows = await query(
-        'SELECT l.id, l.name, l.code FROM user_locations ul JOIN locations l ON ul.location_id = l.id WHERE ul.user_id = ?',
+        'SELECT l.id, l.name, l.code FROM asset_user_locations ul JOIN asset_locations l ON ul.location_id = l.id WHERE ul.user_id = ?',
         [user.id]
       );
       user.locations = locationRows; // [{id, name, code}, ...]

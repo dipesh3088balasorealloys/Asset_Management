@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { usersApi, authApi, locationsApi } from '../services/api';
+import { usersApi, authApi, locationsApi, employeesApi } from '../services/api';
 
 const emptyRegisterForm = () => ({
   employeeId: '',
   fullName: '',
   email: '',
-  password: '',
   role: 'viewer',
   locationIds: [],
 });
@@ -28,10 +27,6 @@ export default function UserManagement({ showAlert, user }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState(emptyEditForm);
-  const [showResetModal, setShowResetModal] = useState(false);
-  const [resetUserId, setResetUserId] = useState(null);
-  const [resetUserName, setResetUserName] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [allLocations, setAllLocations] = useState([]);
 
   // Fetch all locations for assignment
@@ -74,6 +69,23 @@ export default function UserManagement({ showAlert, user }) {
         : [...prev.locationIds, locId];
       return { ...prev, locationIds: ids };
     });
+  };
+
+  const handleEmpIdBlur = async () => {
+    const empId = registerForm.employeeId.trim();
+    if (!empId) return;
+    try {
+      const res = await employeesApi.lookup(empId);
+      if (res.data) {
+        setRegisterForm(prev => ({
+          ...prev,
+          fullName: res.data.empName || prev.fullName,
+          email: res.data.email || prev.email,
+        }));
+      }
+    } catch {
+      // Employee not found in SAP — leave fields as-is for manual entry
+    }
   };
 
   const toggleEditLocation = (locId) => {
@@ -146,30 +158,6 @@ export default function UserManagement({ showAlert, user }) {
     }
   };
 
-  const openResetPassword = (u) => {
-    setResetUserId(u.id);
-    setResetUserName(u.fullName);
-    setNewPassword('');
-    setShowResetModal(true);
-  };
-
-  const handleResetPasswordSubmit = async (e) => {
-    e.preventDefault();
-    if (!newPassword.trim()) {
-      showAlert('Please enter a new password', 'error');
-      return;
-    }
-    try {
-      await usersApi.resetPassword(resetUserId, newPassword);
-      showAlert(`Password reset successfully for ${resetUserName}`);
-      setShowResetModal(false);
-      setResetUserId(null);
-      setNewPassword('');
-    } catch (err) {
-      showAlert(err?.message || 'Failed to reset password', 'error');
-    }
-  };
-
   const formatDate = (dateStr) => {
     if (!dateStr) return 'Never';
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -195,6 +183,7 @@ export default function UserManagement({ showAlert, user }) {
                 name="employeeId"
                 value={registerForm.employeeId}
                 onChange={handleRegisterChange}
+                onBlur={handleEmpIdBlur}
                 placeholder="e.g. EMP001"
                 required
               />
@@ -218,18 +207,6 @@ export default function UserManagement({ showAlert, user }) {
                 value={registerForm.email}
                 onChange={handleRegisterChange}
                 placeholder="e.g. dipesh.mondal@balasorealloys.com"
-              />
-            </div>
-            <div className="form-group">
-              <label>Password *</label>
-              <input
-                type="password"
-                name="password"
-                value={registerForm.password}
-                onChange={handleRegisterChange}
-                placeholder="Minimum 6 characters"
-                required
-                minLength={6}
               />
             </div>
           </div>
@@ -345,13 +322,6 @@ export default function UserManagement({ showAlert, user }) {
                         >
                           {u.isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button
-                          className="btn"
-                          style={{ padding: '5px 12px', fontSize: '0.78rem', whiteSpace: 'nowrap', background: '#7b1fa2', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}
-                          onClick={() => openResetPassword(u)}
-                        >
-                          Reset Password
-                        </button>
                       </div>
                     </td>
                   </tr>
@@ -440,31 +410,6 @@ export default function UserManagement({ showAlert, user }) {
         </div>
       )}
 
-      {/* Reset Password Modal */}
-      {showResetModal && (
-        <div className="modal-overlay" onClick={() => setShowResetModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Reset Password for {resetUserName}</h3>
-            <form onSubmit={handleResetPasswordSubmit}>
-              <div className="form-group" style={{ marginBottom: 20 }}>
-                <label>New Password</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  required
-                  minLength={6}
-                />
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowResetModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Reset Password</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
 }

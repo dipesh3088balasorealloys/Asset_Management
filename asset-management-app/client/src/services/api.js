@@ -89,7 +89,6 @@ export const authApi = {
   login: (data) => api.post('/auth/login', data),
   register: (data) => api.post('/auth/register', data),
   getMe: () => api.get('/auth/me'),
-  changePassword: (data) => api.put('/auth/change-password', data),
 };
 
 // Users
@@ -98,7 +97,6 @@ export const usersApi = {
   getById: (id) => api.get(`/users/${id}`),
   update: (id, data) => api.put(`/users/${id}`, data),
   deactivate: (id) => api.put(`/users/${id}/deactivate`),
-  resetPassword: (id, newPassword) => api.put(`/users/${id}/reset-password`, { newPassword }),
 };
 
 // Audit Logs

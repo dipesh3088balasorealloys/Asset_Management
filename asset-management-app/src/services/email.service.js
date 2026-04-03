@@ -2,7 +2,7 @@ const { query } = require('../utils/db');
 const transporter = require('../config/email');
 const logger = require('../utils/logger');
 
-const FROM_NAME = process.env.EMAIL_FROM_NAME || 'BAL Connect';
+const FROM_NAME = process.env.EMAIL_FROM_NAME || 'BAL Infra ManageEngine';
 const FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'it.helpdesk@balasorealloys.com';
 
 // ---------------------------------------------------------------------------
@@ -27,7 +27,7 @@ async function sendEmail({ to, subject, html, template, entityType, entityId }) 
   if (!transporter) {
     logger.info(`[Email-Dev] Would send "${subject}" to ${toAddress}`);
     await query(
-      'INSERT INTO email_log (to_email, subject, template, status, error, entity_type, entity_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO asset_email_log (to_email, subject, template, status, error, entity_type, entity_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [toAddress, subject, template || null, 'skipped', null, entityType || null, entityId || null]
     );
     return { status: 'skipped' };
@@ -42,7 +42,7 @@ async function sendEmail({ to, subject, html, template, entityType, entityId }) 
     });
 
     await query(
-      'INSERT INTO email_log (to_email, subject, template, status, error, entity_type, entity_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO asset_email_log (to_email, subject, template, status, error, entity_type, entity_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [toAddress, subject, template || null, 'sent', null, entityType || null, entityId || null]
     );
 
@@ -52,7 +52,7 @@ async function sendEmail({ to, subject, html, template, entityType, entityId }) 
     logger.error(`[Email] Failed to send "${subject}" to ${toAddress}:`, err.message);
 
     await query(
-      'INSERT INTO email_log (to_email, subject, template, status, error, entity_type, entity_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO asset_email_log (to_email, subject, template, status, error, entity_type, entity_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [toAddress, subject, template || null, 'failed', err.message, entityType || null, entityId || null]
     );
 

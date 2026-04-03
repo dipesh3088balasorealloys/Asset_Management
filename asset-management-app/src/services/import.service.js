@@ -188,7 +188,7 @@ async function importAssets(fileBuffer, mimetype, userId) {
       const notes = row.notes || null;
 
       const insertResult = await query(
-        `INSERT INTO assets
+        `INSERT INTO asset_assets
            (category, name, serial_no, quantity, available, price,
             vendor, purchase_date, warranty_end, location, notes, created_by)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -196,7 +196,7 @@ async function importAssets(fileBuffer, mimetype, userId) {
          vendor, purchaseDate, warrantyEnd, location, notes, userId || null]
       );
 
-      const rows = await query('SELECT * FROM assets WHERE id = ?', [insertResult.insertId]);
+      const rows = await query('SELECT * FROM asset_assets WHERE id = ?', [insertResult.insertId]);
       imported.push(rows[0] || insertResult);
     } catch (err) {
       logger.error(`Import asset row ${rowNumber} failed: ${err.message}`);
@@ -256,13 +256,13 @@ async function importLicenses(fileBuffer, mimetype, userId) {
       const vendor = row.vendor || null;
 
       const insertResult = await query(
-        `INSERT INTO licenses
+        `INSERT INTO asset_licenses
            (name, quantity, available, license_key, start_date, end_date, vendor, created_by)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [name, quantity, quantity, licenseKey, startDate, endDate, vendor, userId || null]
       );
 
-      const rows = await query('SELECT * FROM licenses WHERE id = ?', [insertResult.insertId]);
+      const rows = await query('SELECT * FROM asset_licenses WHERE id = ?', [insertResult.insertId]);
       imported.push(rows[0] || insertResult);
     } catch (err) {
       logger.error(`Import license row ${rowNumber} failed: ${err.message}`);
@@ -361,7 +361,7 @@ async function importServices(fileBuffer, mimetype, userId) {
       const notes = row.notes || null;
 
       const insertResult = await query(
-        `INSERT INTO services
+        `INSERT INTO asset_services
            (type, name, provider, cost, status, billing_cycle,
             start_date, end_date, account_id, contact_info, notes, created_by)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -369,7 +369,7 @@ async function importServices(fileBuffer, mimetype, userId) {
          startDate, endDate, accountId, contactInfo, notes, userId || null]
       );
 
-      const rows = await query('SELECT * FROM services WHERE id = ?', [insertResult.insertId]);
+      const rows = await query('SELECT * FROM asset_services WHERE id = ?', [insertResult.insertId]);
       imported.push(rows[0] || insertResult);
     } catch (err) {
       logger.error(`Import service row ${rowNumber} failed: ${err.message}`);
@@ -393,8 +393,8 @@ async function importAssignments(fileBuffer, mimetype, userId) {
   let skipped = 0;
 
   // Pre-fetch all assets and licenses for lookup
-  const allAssets = await query('SELECT id, name, category, serial_no, location FROM assets WHERE is_deleted = 0');
-  const allLicenses = await query('SELECT id, name FROM licenses WHERE is_deleted = 0');
+  const allAssets = await query('SELECT id, name, category, serial_no, location FROM asset_assets WHERE is_deleted = 0');
+  const allLicenses = await query('SELECT id, name FROM asset_licenses WHERE is_deleted = 0');
 
   const licenseNameMap = {};
   for (const l of allLicenses) licenseNameMap[l.name.toLowerCase().trim()] = l.id;
@@ -476,7 +476,7 @@ async function importAssignments(fileBuffer, mimetype, userId) {
           }
           if (updates.length > 0) {
             params.push(matched.id);
-            await query(`UPDATE assets SET ${updates.join(', ')} WHERE id = ?`, params);
+            await query(`UPDATE asset_assets SET ${updates.join(', ')} WHERE id = ?`, params);
           }
         } else {
           errors.push({ row: rowNumber, reason: `Asset not found: "${assetModel}"${assetType ? ` (type: ${assetType})` : ''}` });
@@ -504,7 +504,7 @@ async function importAssignments(fileBuffer, mimetype, userId) {
         continue;
       }
 
-      const result = await callProc('assignment_create', [
+      const result = await callProc('SP_ASSET_ASSIGNMENT_CREATE', [
         empName,
         empId,
         department,

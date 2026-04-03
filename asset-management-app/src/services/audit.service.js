@@ -7,7 +7,7 @@ const { parsePagination, buildPaginationMeta } = require('../utils/pagination');
 async function logAction({ userId, action, entityType, entityId, oldValues, newValues, ipAddress, userAgent }) {
   try {
     await query(
-      'INSERT INTO audit_log (user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO asset_audit_log (user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         userId || null,
         action,
@@ -30,7 +30,7 @@ async function logAction({ userId, action, entityType, entityId, oldValues, newV
 async function getAuditLogs({ page, limit, action, entityType, userId, startDate, endDate, search } = {}) {
   const pagination = parsePagination({ page, limit });
 
-  const sets = await callProcMulti('audit_list', [
+  const sets = await callProcMulti('SP_ASSET_AUDIT_LIST', [
     action || null,
     entityType || null,
     userId ? Number(userId) : null,
@@ -70,8 +70,8 @@ async function getAuditLogs({ page, limit, action, entityType, userId, startDate
 async function getEntityHistory(entityType, entityId) {
   const rows = await query(
     `SELECT al.*, u.full_name AS user_full_name, u.email AS user_email, u.role AS user_role
-     FROM audit_log al
-     LEFT JOIN users u ON al.user_id = u.id
+     FROM asset_audit_log al
+     LEFT JOIN asset_users u ON al.user_id = u.id
      WHERE al.entity_type = ? AND al.entity_id = ?
      ORDER BY al.created_at DESC`,
     [entityType, Number(entityId)]

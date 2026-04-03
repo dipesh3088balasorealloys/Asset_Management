@@ -34,8 +34,8 @@ async function _attachRelations(assignments) {
     ? await query(
         `SELECT aa.assignment_id, aa.asset_id, aa.quantity,
                 a.id AS a_id, a.name AS a_name, a.category AS a_category
-           FROM assignment_assets aa
-           JOIN assets a ON aa.asset_id = a.id
+           FROM asset_assignment_assets aa
+           JOIN asset_assets a ON aa.asset_id = a.id
           WHERE aa.assignment_id IN (?)`,
         [ids],
       )
@@ -45,8 +45,8 @@ async function _attachRelations(assignments) {
     ? await query(
         `SELECT al.assignment_id, al.license_id, al.quantity,
                 l.id AS l_id, l.name AS l_name
-           FROM assignment_licenses al
-           JOIN licenses l ON al.license_id = l.id
+           FROM asset_assignment_licenses al
+           JOIN asset_licenses l ON al.license_id = l.id
           WHERE al.assignment_id IN (?)`,
         [ids],
       )
@@ -102,7 +102,7 @@ function _nestDepartment(row) {
 
 async function getDashboardSummary(locationIds) {
   // Use the SP for license/service data (company-wide), then override asset stats with location-filtered queries
-  const sets = await callProcMulti('report_dashboard_summary', []);
+  const sets = await callProcMulti('SP_ASSET_REPORT_DASHBOARD_SUMMARY', []);
 
   const cardsRow = sets[0] && sets[0][0] ? sets[0][0] : {};
 
@@ -111,8 +111,8 @@ async function getDashboardSummary(locationIds) {
   if (loc.sql) {
     const [assetStats] = await query(
       `SELECT COUNT(*) AS totalAssets, SUM(assigned) AS assignedAssets,
-              (SELECT COUNT(DISTINCT a2.id) FROM assignments a2 WHERE a2.is_active = 1${_locationWhere(locationIds, 'a2.location_id').sql}) AS employeesWithAssets
-       FROM assets a WHERE a.is_deleted = 0${loc.sql}`,
+              (SELECT COUNT(DISTINCT a2.id) FROM asset_assignments a2 WHERE a2.is_active = 1${_locationWhere(locationIds, 'a2.location_id').sql}) AS employeesWithAssets
+       FROM asset_assets a WHERE a.is_deleted = 0${loc.sql}`,
       [...loc.params, ..._locationWhere(locationIds, 'a2.location_id').params]
     );
     cardsRow.totalAssets = assetStats?.totalAssets || 0;
@@ -169,7 +169,7 @@ async function getAssetUtilization(locationIds) {
        SUM(assigned) AS assigned,
        SUM(available) AS available,
        ROUND(IF(SUM(quantity) > 0, SUM(assigned) / SUM(quantity) * 100, 0), 1) AS utilization
-     FROM assets a
+     FROM asset_assets a
      WHERE is_deleted = 0${loc.sql}
      GROUP BY category
      ORDER BY total DESC`,
@@ -202,7 +202,7 @@ async function getLicenseUtilization() {
        ROUND(IF(quantity > 0, used / quantity * 100, 0), 1) AS utilization,
        DATEDIFF(end_date, CURDATE()) AS days_remaining,
        end_date
-     FROM licenses
+     FROM asset_licenses
      WHERE is_deleted = 0
      ORDER BY utilization DESC`
   );
@@ -237,7 +237,7 @@ async function getLicenseUtilization() {
 // -----------------------------------------------------------------------
 
 async function getServiceCostBreakdown() {
-  const sets = await callProcMulti('service_cost_breakdown', []);
+  const sets = await callProcMulti('SP_ASSET_SERVICE_COST_BREAKDOWN', []);
 
   const byType = (sets[0] || []).map(r => ({
     type: r.type,
@@ -271,11 +271,11 @@ async function getEmployeeSummary(locationIds) {
        d.name AS department_name,
        l.name AS org_location_name,
        a.assign_date, a.notes, a.created_at,
-       (SELECT COUNT(*) FROM assignment_assets aa WHERE aa.assignment_id = a.id) AS asset_count,
-       (SELECT COUNT(*) FROM assignment_licenses al WHERE al.assignment_id = a.id) AS license_count
-     FROM assignments a
-     LEFT JOIN departments d ON a.department_id = d.id
-     LEFT JOIN locations l ON a.location_id = l.id
+       (SELECT COUNT(*) FROM asset_assignment_assets aa WHERE aa.assignment_id = a.id) AS asset_count,
+       (SELECT COUNT(*) FROM asset_assignment_licenses al WHERE al.assignment_id = a.id) AS license_count
+     FROM asset_assignments a
+     LEFT JOIN asset_departments d ON a.department_id = d.id
+     LEFT JOIN asset_locations l ON a.location_id = l.id
      WHERE a.is_active = 1${loc.sql}
      ORDER BY a.emp_name ASC`,
     loc.params
@@ -296,13 +296,13 @@ async function getUpcomingRenewals(days = 30) {
     `(SELECT
         'license' AS item_type, id, name, NULL AS provider, vendor, end_date,
         DATEDIFF(end_date, CURDATE()) AS days_remaining
-      FROM licenses
+      FROM asset_licenses
       WHERE is_deleted = 0 AND end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY))
      UNION ALL
      (SELECT
         'service' AS item_type, id, name, provider, NULL AS vendor, end_date,
         DATEDIFF(end_date, CURDATE()) AS days_remaining
-      FROM services
+      FROM asset_services
       WHERE is_deleted = 0 AND status = 'Active' AND end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY))
      ORDER BY end_date ASC`,
     [days, days]
@@ -331,8 +331,8 @@ async function getLocationSummary(locationIds) {
        IFNULL(SUM(a.quantity), 0) AS total_assets,
        IFNULL(SUM(a.assigned), 0) AS assigned_assets,
        IFNULL(SUM(a.available), 0) AS available_assets
-     FROM locations l
-     LEFT JOIN assets a ON a.location_id = l.id AND a.is_deleted = 0
+     FROM asset_locations l
+     LEFT JOIN asset_assets a ON a.location_id = l.id AND a.is_deleted = 0
      WHERE l.is_active = 1${locFilter.sql}
      GROUP BY l.id, l.name, l.code
      ORDER BY l.name`,
@@ -344,8 +344,8 @@ async function getLocationSummary(locationIds) {
     `SELECT
        l.id AS location_id,
        COUNT(DISTINCT asgn.id) AS employee_count
-     FROM locations l
-     LEFT JOIN assignments asgn ON asgn.location_id = l.id AND asgn.is_active = 1
+     FROM asset_locations l
+     LEFT JOIN asset_assignments asgn ON asgn.location_id = l.id AND asgn.is_active = 1
      WHERE l.is_active = 1${locFilter.sql}
      GROUP BY l.id`,
     locFilter.params
@@ -357,7 +357,7 @@ async function getLocationSummary(locationIds) {
        IFNULL(SUM(quantity), 0) AS total_licenses,
        IFNULL(SUM(used), 0) AS used_licenses,
        IFNULL(SUM(available), 0) AS available_licenses
-     FROM licenses WHERE is_deleted = 0`
+     FROM asset_licenses WHERE is_deleted = 0`
   );
 
   // Services — company-wide
@@ -369,7 +369,7 @@ async function getLocationSummary(locationIds) {
          WHEN 'Quarterly' THEN cost / 3
          WHEN 'Yearly' THEN cost / 12
          WHEN 'OneTime' THEN 0 ELSE 0 END), 2), 0) AS monthly_cost
-     FROM services WHERE is_deleted = 0 AND status = 'Active'`
+     FROM asset_services WHERE is_deleted = 0 AND status = 'Active'`
   );
 
   // Build employee map

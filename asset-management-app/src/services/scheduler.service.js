@@ -8,7 +8,7 @@ const { sendExpiryReminder } = require('./email.service');
 // ---------------------------------------------------------------------------
 
 async function getAdminEmails() {
-  const admins = await query("SELECT email FROM users WHERE role = 'admin' AND is_active = 1");
+  const admins = await query("SELECT email FROM asset_users WHERE role = 'admin' AND is_active = 1");
   return admins.map((a) => a.email);
 }
 
@@ -33,13 +33,13 @@ async function checkExpiringItems() {
 
     // Fetch licenses expiring within the next 60 days
     const expiringLicenses = await query(
-      'SELECT * FROM licenses WHERE is_deleted = 0 AND end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY) ORDER BY end_date ASC',
+      'SELECT * FROM asset_licenses WHERE is_deleted = 0 AND end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY) ORDER BY end_date ASC',
       [days]
     );
 
     // Fetch services expiring within the next 60 days
     const expiringServices = await query(
-      "SELECT * FROM services WHERE is_deleted = 0 AND status = 'Active' AND end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY) ORDER BY end_date ASC",
+      "SELECT * FROM asset_services WHERE is_deleted = 0 AND status = 'Active' AND end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY) ORDER BY end_date ASC",
       [days]
     );
 

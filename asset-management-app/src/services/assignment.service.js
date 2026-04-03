@@ -19,8 +19,8 @@ async function _attachRelations(assignments) {
     ? await query(
         `SELECT aa.assignment_id, aa.asset_id, aa.quantity,
                 a.id AS a_id, a.name AS a_name, a.category AS a_category, a.serial_no AS a_serial_no
-           FROM assignment_assets aa
-           JOIN assets a ON aa.asset_id = a.id
+           FROM asset_assignment_assets aa
+           JOIN asset_assets a ON aa.asset_id = a.id
           WHERE aa.assignment_id IN (?)`,
         [ids],
       )
@@ -31,8 +31,8 @@ async function _attachRelations(assignments) {
     ? await query(
         `SELECT al.assignment_id, al.license_id, al.quantity,
                 l.id AS l_id, l.name AS l_name
-           FROM assignment_licenses al
-           JOIN licenses l ON al.license_id = l.id
+           FROM asset_assignment_licenses al
+           JOIN asset_licenses l ON al.license_id = l.id
           WHERE al.assignment_id IN (?)`,
         [ids],
       )
@@ -103,7 +103,7 @@ async function listAssignments(queryParams, locationIds) {
   const { locationIdsToString } = require('../middleware/locationFilter');
   const locStr = locationIdsToString(locationIds);
 
-  const sets = await callProcMulti('assignment_list', [
+  const sets = await callProcMulti('SP_ASSET_ASSIGNMENT_LIST', [
     search,
     department,
     locStr,
@@ -124,7 +124,7 @@ async function listAssignments(queryParams, locationIds) {
 }
 
 async function getAssignment(id) {
-  const rows = await callProc('assignment_get', [id]);
+  const rows = await callProc('SP_ASSET_ASSIGNMENT_GET', [id]);
 
   if (!rows || rows.length === 0) {
     const err = new Error('Assignment not found');
@@ -142,7 +142,7 @@ async function createAssignment(data, userId) {
   const assetIds = data.assetIds?.join(',') || '';
   const licenseIds = data.licenseIds?.join(',') || '';
 
-  const rows = await callProc('assignment_create', [
+  const rows = await callProc('SP_ASSET_ASSIGNMENT_CREATE', [
     data.empName,
     data.empId,
     data.departmentName || '',
@@ -169,7 +169,7 @@ async function createAssignment(data, userId) {
 }
 
 async function removeAssignment(id) {
-  const rows = await callProc('assignment_remove', [id]);
+  const rows = await callProc('SP_ASSET_ASSIGNMENT_REMOVE', [id]);
 
   // SP will throw / return empty if not found — handle gracefully
   if (!rows || rows.length === 0 || (rows[0] && rows[0].affected === 0)) {
@@ -198,12 +198,12 @@ async function updateAssignment(id, data) {
   // Handle department (find-or-create)
   if (data.departmentName !== undefined) {
     if (data.departmentName) {
-      const [existing] = await query('SELECT id FROM departments WHERE name = ? LIMIT 1', [data.departmentName]);
+      const [existing] = await query('SELECT id FROM asset_departments WHERE name = ? LIMIT 1', [data.departmentName]);
       let deptId;
       if (existing) {
         deptId = existing.id;
       } else {
-        const result = await query('INSERT INTO departments (name) VALUES (?)', [data.departmentName]);
+        const result = await query('INSERT INTO asset_departments (name) VALUES (?)', [data.departmentName]);
         deptId = result.insertId;
       }
       fields.push('department_id = ?');
@@ -221,7 +221,7 @@ async function updateAssignment(id, data) {
 
   params.push(id);
   const result = await query(
-    `UPDATE assignments SET ${fields.join(', ')} WHERE id = ? AND is_active = 1`,
+    `UPDATE asset_assignments SET ${fields.join(', ')} WHERE id = ? AND is_active = 1`,
     params
   );
 

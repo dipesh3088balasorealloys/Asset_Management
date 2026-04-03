@@ -30,7 +30,7 @@ async function listServices(q) {
   const sortField = q.sort      || 'created_at';
   const sortDir   = q.order     || 'desc';
 
-  const sets = await callProcMulti('service_list', [
+  const sets = await callProcMulti('SP_ASSET_SERVICE_LIST', [
     type, search, status, sortField, sortDir, page, limit,
   ]);
 
@@ -43,7 +43,7 @@ async function listServices(q) {
 }
 
 async function getService(id) {
-  const rows = await getById('services', id);
+  const rows = await getById('asset_services', id);
   if (!rows.length) {
     const err = new Error('Service not found');
     err.statusCode = 404;
@@ -54,7 +54,7 @@ async function getService(id) {
 
 async function createService(data, userId) {
   const result = await query(
-    `INSERT INTO services
+    `INSERT INTO asset_services
        (type, name, provider, cost, status, billing_cycle,
         start_date, end_date, account_id, contact_info, notes, created_by)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -73,14 +73,14 @@ async function createService(data, userId) {
       userId || null,
     ]
   );
-  return (await getById('services', result.insertId))[0];
+  return (await getById('asset_services', result.insertId))[0];
 }
 
 async function updateService(id, data) {
   const existing = await getService(id);
 
   await query(
-    `UPDATE services SET
+    `UPDATE asset_services SET
        type = ?, name = ?, provider = ?, cost = ?, status = ?,
        billing_cycle = ?, start_date = ?, end_date = ?,
        account_id = ?, contact_info = ?, notes = ?
@@ -105,7 +105,7 @@ async function updateService(id, data) {
 
 async function deleteService(id) {
   await getService(id);
-  await softDelete('services', id);
+  await softDelete('asset_services', id);
   return { message: 'Service deleted successfully' };
 }
 
@@ -126,7 +126,7 @@ async function getCostSummary() {
          WHEN 'Yearly' THEN cost
          ELSE 0
        END), 2) AS totalYearly
-     FROM services
+     FROM asset_services
      WHERE is_deleted = 0 AND status = 'Active'`
   );
 

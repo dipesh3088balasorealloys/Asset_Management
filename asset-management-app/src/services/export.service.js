@@ -231,19 +231,19 @@ const ASSIGNMENT_COLUMNS = [
 // ---------------------------------------------------------------------------
 
 async function exportAssetsCsv() {
-  const assets = await query('SELECT * FROM assets WHERE is_deleted = 0 ORDER BY created_at DESC');
+  const assets = await query('SELECT * FROM asset_assets WHERE is_deleted = 0 ORDER BY created_at DESC');
   logger.info(`Exporting ${assets.length} assets to CSV`);
   return toCsv(assets, ASSET_COLUMNS);
 }
 
 async function exportLicensesCsv() {
-  const licenses = await query('SELECT * FROM licenses WHERE is_deleted = 0 ORDER BY created_at DESC');
+  const licenses = await query('SELECT * FROM asset_licenses WHERE is_deleted = 0 ORDER BY created_at DESC');
   logger.info(`Exporting ${licenses.length} licenses to CSV`);
   return toCsv(licenses, LICENSE_COLUMNS);
 }
 
 async function exportServicesCsv() {
-  const services = await query('SELECT * FROM services WHERE is_deleted = 0 ORDER BY created_at DESC');
+  const services = await query('SELECT * FROM asset_services WHERE is_deleted = 0 ORDER BY created_at DESC');
   logger.info(`Exporting ${services.length} services to CSV`);
   return toCsv(services, SERVICE_COLUMNS);
 }
@@ -253,19 +253,19 @@ async function exportServicesCsv() {
 // ---------------------------------------------------------------------------
 
 async function exportAssetsPdf() {
-  const assets = await query('SELECT * FROM assets WHERE is_deleted = 0 ORDER BY created_at DESC');
+  const assets = await query('SELECT * FROM asset_assets WHERE is_deleted = 0 ORDER BY created_at DESC');
   logger.info(`Exporting ${assets.length} assets to PDF`);
   return generatePdf('Asset Inventory Report', ASSET_COLUMNS, assets);
 }
 
 async function exportLicensesPdf() {
-  const licenses = await query('SELECT * FROM licenses WHERE is_deleted = 0 ORDER BY created_at DESC');
+  const licenses = await query('SELECT * FROM asset_licenses WHERE is_deleted = 0 ORDER BY created_at DESC');
   logger.info(`Exporting ${licenses.length} licenses to PDF`);
   return generatePdf('License Inventory Report', LICENSE_COLUMNS, licenses);
 }
 
 async function exportServicesPdf() {
-  const services = await query('SELECT * FROM services WHERE is_deleted = 0 ORDER BY created_at DESC');
+  const services = await query('SELECT * FROM asset_services WHERE is_deleted = 0 ORDER BY created_at DESC');
   logger.info(`Exporting ${services.length} services to PDF`);
   return generatePdf('Service Subscriptions Report', SERVICE_COLUMNS, services);
 }
@@ -278,8 +278,8 @@ async function fetchAssignmentsFlat() {
   const assignments = await query(
     `SELECT a.id, a.emp_name, a.emp_id, a.emp_email, a.assign_date, a.notes,
             d.name AS department_name
-       FROM assignments a
-       LEFT JOIN departments d ON a.department_id = d.id
+       FROM asset_assignments a
+       LEFT JOIN asset_departments d ON a.department_id = d.id
       WHERE a.is_active = 1
       ORDER BY a.created_at DESC`
   );
@@ -290,16 +290,16 @@ async function fetchAssignmentsFlat() {
 
   const assetRows = await query(
     `SELECT aa.assignment_id, ast.name, ast.category, ast.serial_no, ast.location
-       FROM assignment_assets aa
-       JOIN assets ast ON aa.asset_id = ast.id
+       FROM asset_assignment_assets aa
+       JOIN asset_assets ast ON aa.asset_id = ast.id
       WHERE aa.assignment_id IN (?)`,
     [ids]
   );
 
   const licenseRows = await query(
     `SELECT al.assignment_id, l.name
-       FROM assignment_licenses al
-       JOIN licenses l ON al.license_id = l.id
+       FROM asset_assignment_licenses al
+       JOIN asset_licenses l ON al.license_id = l.id
       WHERE al.assignment_id IN (?)`,
     [ids]
   );

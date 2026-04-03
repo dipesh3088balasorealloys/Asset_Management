@@ -21,7 +21,7 @@ async function listLicenses(q) {
   const sortField = q.sort      || 'created_at';
   const sortDir   = q.order     || 'desc';
 
-  const sets = await callProcMulti('license_list', [
+  const sets = await callProcMulti('SP_ASSET_LICENSE_LIST', [
     search, vendor, status, sortField, sortDir, page, limit,
   ]);
 
@@ -34,7 +34,7 @@ async function listLicenses(q) {
 }
 
 async function getLicense(id) {
-  const rows = await getById('licenses', id);
+  const rows = await getById('asset_licenses', id);
   if (!rows.length) {
     const err = new Error('License not found');
     err.statusCode = 404;
@@ -45,7 +45,7 @@ async function getLicense(id) {
 
 async function createLicense(data, userId) {
   const result = await query(
-    `INSERT INTO licenses
+    `INSERT INTO asset_licenses
        (name, quantity, available, license_key, start_date, end_date, vendor, created_by)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
@@ -59,7 +59,7 @@ async function createLicense(data, userId) {
       userId || null,
     ]
   );
-  return (await getById('licenses', result.insertId))[0];
+  return (await getById('asset_licenses', result.insertId))[0];
 }
 
 async function updateLicense(id, data) {
@@ -78,7 +78,7 @@ async function updateLicense(id, data) {
   const newAvailable = newQty - existing.used;
 
   await query(
-    `UPDATE licenses SET
+    `UPDATE asset_licenses SET
        name = ?, quantity = ?, available = ?, license_key = ?,
        start_date = ?, end_date = ?, vendor = ?
      WHERE id = ? AND is_deleted = 0`,
@@ -103,13 +103,13 @@ async function deleteLicense(id) {
     err.statusCode = 400;
     throw err;
   }
-  await softDelete('licenses', id);
+  await softDelete('asset_licenses', id);
   return { message: 'License deleted successfully' };
 }
 
 async function getExpiringLicenses(days = 30) {
   return query(
-    `SELECT * FROM licenses
+    `SELECT * FROM asset_licenses
      WHERE is_deleted = 0
        AND end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY)
      ORDER BY end_date ASC`,

@@ -13,7 +13,7 @@ async function listServerBackups(q) {
   const sortField  = q.sort       || 'created_at';
   const sortDir    = q.order      || 'desc';
 
-  const sets = await callProcMulti('server_backup_list', [
+  const sets = await callProcMulti('SP_ASSET_SERVER_BACKUP_LIST', [
     search, backupType, status, sortField, sortDir, page, limit,
   ]);
 
@@ -24,7 +24,7 @@ async function listServerBackups(q) {
 }
 
 async function getServerBackup(id) {
-  const rows = await getById('server_backups', id);
+  const rows = await getById('asset_server_backups', id);
   if (!rows.length) {
     const err = new Error('Server backup not found');
     err.statusCode = 404;
@@ -35,7 +35,7 @@ async function getServerBackup(id) {
 
 async function createServerBackup(data, userId) {
   const result = await query(
-    `INSERT INTO server_backups
+    `INSERT INTO asset_server_backups
        (server_name, server_ip, backup_type, backup_schedule, storage_location,
         storage_path, last_backup_date, last_backup_status, backup_size_gb,
         retention_days, responsible_person, remarks, created_by)
@@ -56,14 +56,14 @@ async function createServerBackup(data, userId) {
       userId || null,
     ]
   );
-  return (await getById('server_backups', result.insertId))[0];
+  return (await getById('asset_server_backups', result.insertId))[0];
 }
 
 async function updateServerBackup(id, data) {
   const existing = await getServerBackup(id);
 
   await query(
-    `UPDATE server_backups SET
+    `UPDATE asset_server_backups SET
        server_name = ?, server_ip = ?, backup_type = ?, backup_schedule = ?,
        storage_location = ?, storage_path = ?, last_backup_date = ?,
        last_backup_status = ?, backup_size_gb = ?, retention_days = ?,
@@ -90,7 +90,7 @@ async function updateServerBackup(id, data) {
 
 async function deleteServerBackup(id) {
   await getServerBackup(id);
-  await softDelete('server_backups', id);
+  await softDelete('asset_server_backups', id);
   return { message: 'Server backup deleted successfully' };
 }
 
@@ -106,7 +106,7 @@ async function listDbBackups(q) {
   const sortField  = q.sort       || 'created_at';
   const sortDir    = q.order      || 'desc';
 
-  const sets = await callProcMulti('db_backup_list', [
+  const sets = await callProcMulti('SP_ASSET_DB_BACKUP_LIST', [
     search, engine, backupType, status, sortField, sortDir, page, limit,
   ]);
 
@@ -117,7 +117,7 @@ async function listDbBackups(q) {
 }
 
 async function getDbBackup(id) {
-  const rows = await getById('db_backups', id);
+  const rows = await getById('asset_db_backups', id);
   if (!rows.length) {
     const err = new Error('Database backup not found');
     err.statusCode = 404;
@@ -128,7 +128,7 @@ async function getDbBackup(id) {
 
 async function createDbBackup(data, userId) {
   const result = await query(
-    `INSERT INTO db_backups
+    `INSERT INTO asset_db_backups
        (database_name, server_name, db_engine, backup_type, backup_schedule,
         storage_location, storage_path, last_backup_date, last_backup_status,
         backup_size_gb, retention_days, responsible_person, remarks, created_by)
@@ -150,14 +150,14 @@ async function createDbBackup(data, userId) {
       userId || null,
     ]
   );
-  return (await getById('db_backups', result.insertId))[0];
+  return (await getById('asset_db_backups', result.insertId))[0];
 }
 
 async function updateDbBackup(id, data) {
   const existing = await getDbBackup(id);
 
   await query(
-    `UPDATE db_backups SET
+    `UPDATE asset_db_backups SET
        database_name = ?, server_name = ?, db_engine = ?, backup_type = ?,
        backup_schedule = ?, storage_location = ?, storage_path = ?,
        last_backup_date = ?, last_backup_status = ?, backup_size_gb = ?,
@@ -185,7 +185,7 @@ async function updateDbBackup(id, data) {
 
 async function deleteDbBackup(id) {
   await getDbBackup(id);
-  await softDelete('db_backups', id);
+  await softDelete('asset_db_backups', id);
   return { message: 'Database backup deleted successfully' };
 }
 
@@ -198,7 +198,7 @@ async function listEmployeeBackups(q) {
   const sortField = q.sort   || 'created_at';
   const sortDir   = q.order  || 'desc';
 
-  const sets = await callProcMulti('employee_backup_list', [
+  const sets = await callProcMulti('SP_ASSET_EMPLOYEE_BACKUP_LIST', [
     search, sortField, sortDir, page, limit,
   ]);
 
@@ -209,7 +209,7 @@ async function listEmployeeBackups(q) {
 }
 
 async function getEmployeeBackup(id) {
-  const rows = await getById('employee_backups', id);
+  const rows = await getById('asset_employee_backups', id);
   if (!rows.length) {
     const err = new Error('Employee backup not found');
     err.statusCode = 404;
@@ -220,7 +220,7 @@ async function getEmployeeBackup(id) {
 
 async function createEmployeeBackup(data, userId) {
   const result = await query(
-    `INSERT INTO employee_backups
+    `INSERT INTO asset_employee_backups
        (sl_no, email_id, user_name, email_backup, onedrive_backup,
         desktop_laptop_backup, disk_name, remarks, created_by)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -236,14 +236,14 @@ async function createEmployeeBackup(data, userId) {
       userId || null,
     ]
   );
-  return (await getById('employee_backups', result.insertId))[0];
+  return (await getById('asset_employee_backups', result.insertId))[0];
 }
 
 async function updateEmployeeBackup(id, data) {
   const existing = await getEmployeeBackup(id);
 
   await query(
-    `UPDATE employee_backups SET
+    `UPDATE asset_employee_backups SET
        sl_no = ?, email_id = ?, user_name = ?, email_backup = ?,
        onedrive_backup = ?, desktop_laptop_backup = ?, disk_name = ?, remarks = ?
      WHERE id = ? AND is_deleted = 0`,
@@ -264,7 +264,7 @@ async function updateEmployeeBackup(id, data) {
 
 async function deleteEmployeeBackup(id) {
   await getEmployeeBackup(id);
-  await softDelete('employee_backups', id);
+  await softDelete('asset_employee_backups', id);
   return { message: 'Employee backup deleted successfully' };
 }
 

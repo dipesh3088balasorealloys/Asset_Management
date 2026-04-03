@@ -16,7 +16,7 @@ async function listAssets(q, locationIds) {
   const { locationIdsToString } = require('../middleware/locationFilter');
   const locStr = locationIdsToString(locationIds);
 
-  const sets = await callProcMulti('asset_list', [
+  const sets = await callProcMulti('SP_ASSET_ASSET_LIST', [
     category, search, stockStatus, locStr, sortField, sortDir, page, limit,
   ]);
 
@@ -27,7 +27,7 @@ async function listAssets(q, locationIds) {
 }
 
 async function getAsset(id) {
-  const rows = await getById('assets', id);
+  const rows = await getById('asset_assets', id);
   if (!rows.length) {
     const err = new Error('Asset not found');
     err.statusCode = 404;
@@ -38,7 +38,7 @@ async function getAsset(id) {
 
 async function createAsset(data, userId) {
   const result = await query(
-    `INSERT INTO assets
+    `INSERT INTO asset_assets
        (category, name, serial_no, quantity, available, price,
         vendor, purchase_date, warranty_end, location, location_id, po_number, notes, created_by)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -59,7 +59,7 @@ async function createAsset(data, userId) {
       userId || null,
     ]
   );
-  return (await getById('assets', result.insertId))[0];
+  return (await getById('asset_assets', result.insertId))[0];
 }
 
 async function updateAsset(id, data) {
@@ -79,7 +79,7 @@ async function updateAsset(id, data) {
   const newAvailable = newQty - existing.assigned;
 
   await query(
-    `UPDATE assets SET
+    `UPDATE asset_assets SET
        category = ?, name = ?, serial_no = ?, quantity = ?, available = ?,
        price = ?, vendor = ?, purchase_date = ?, warranty_end = ?,
        location = ?, location_id = ?, po_number = ?, notes = ?
@@ -111,13 +111,13 @@ async function deleteAsset(id) {
     err.statusCode = 400;
     throw err;
   }
-  await softDelete('assets', id);
+  await softDelete('asset_assets', id);
   return { message: 'Asset deleted successfully' };
 }
 
 async function getLowStockAssets() {
   return query(
-    `SELECT * FROM assets
+    `SELECT * FROM asset_assets
      WHERE is_deleted = 0 AND available <= ? AND available >= 0
      ORDER BY available ASC`,
     [LOW_STOCK_THRESHOLD]

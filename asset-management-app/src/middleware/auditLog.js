@@ -11,15 +11,15 @@ const { query } = require('../utils/db');
 
 // Map entityType → database table name
 const ENTITY_TABLE = {
-  Asset: 'assets',
-  License: 'licenses',
-  Service: 'services',
-  Assignment: 'assignments',
-  EWaste: 'ewaste',
-  ServerBackup: 'server_backups',
-  DbBackup: 'db_backups',
-  EmployeeBackup: 'employee_backups',
-  User: 'users',
+  Asset: 'asset_assets',
+  License: 'asset_licenses',
+  Service: 'asset_services',
+  Assignment: 'asset_assignments',
+  EWaste: 'asset_ewaste',
+  ServerBackup: 'asset_server_backups',
+  DbBackup: 'asset_db_backups',
+  EmployeeBackup: 'asset_employee_backups',
+  User: 'asset_users',
 };
 
 // Fields to exclude from audit snapshots (sensitive / noisy)
@@ -81,7 +81,7 @@ function auditLog(action, entityType) {
         }
 
         query(
-          'INSERT INTO audit_log (user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO asset_audit_log (user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
           [
             req.user?.id || null,
             action,

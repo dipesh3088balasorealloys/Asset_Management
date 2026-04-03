@@ -1,6 +1,5 @@
 const { callProcMulti, query } = require('../utils/db');
 const { parsePagination, buildPaginationMeta } = require('../utils/pagination');
-const bcrypt = require('bcryptjs');
 const { USER_COLS } = require('../utils/queries');
 
 /**
@@ -10,7 +9,7 @@ async function _attachLocations(users) {
   if (!users || users.length === 0) return users;
   const ids = users.map(u => u.id);
   const rows = await query(
-    'SELECT ul.user_id, l.id, l.name, l.code FROM user_locations ul JOIN locations l ON ul.location_id = l.id WHERE ul.user_id IN (?)',
+    'SELECT ul.user_id, l.id, l.name, l.code FROM asset_user_locations ul JOIN asset_locations l ON ul.location_id = l.id WHERE ul.user_id IN (?)',
     [ids]
   );
   const map = {};
@@ -31,7 +30,7 @@ async function getUsers(queryParams) {
   const sortField = queryParams.sort || 'created_at';
   const sortDir = queryParams.direction || queryParams.order || 'desc';
 
-  const sets = await callProcMulti('user_list', [
+  const sets = await callProcMulti('SP_ASSET_USER_LIST', [
     search,
     role,
     sortField,
@@ -51,7 +50,7 @@ async function getUsers(queryParams) {
 }
 
 async function getUserById(id) {
-  const rows = await query(`SELECT ${USER_COLS} FROM users WHERE id = ?`, [id]);
+  const rows = await query(`SELECT ${USER_COLS} FROM asset_users WHERE id = ?`, [id]);
 
   if (!rows || rows.length === 0) {
     const err = new Error('User not found');
@@ -62,7 +61,7 @@ async function getUserById(id) {
   const user = rows[0];
   // Attach locations
   const locRows = await query(
-    'SELECT l.id, l.name, l.code FROM user_locations ul JOIN locations l ON ul.location_id = l.id WHERE ul.user_id = ?',
+    'SELECT l.id, l.name, l.code FROM asset_user_locations ul JOIN asset_locations l ON ul.location_id = l.id WHERE ul.user_id = ?',
     [id]
   );
   user.locations = locRows;
@@ -73,7 +72,7 @@ async function updateUser(id, data) {
   // Verify user exists first (throws 404 if not)
   await getUserById(id);
 
-  const rows = await callProcMulti('user_update', [
+  const rows = await callProcMulti('SP_ASSET_USER_UPDATE', [
     id,
     data.fullName !== undefined ? data.fullName : null,
     data.employeeId !== undefined ? data.employeeId : null,
@@ -84,10 +83,10 @@ async function updateUser(id, data) {
 
   // Update user locations if provided
   if (data.locationIds !== undefined) {
-    await query('DELETE FROM user_locations WHERE user_id = ?', [id]);
+    await query('DELETE FROM asset_user_locations WHERE user_id = ?', [id]);
     if (data.locationIds && data.locationIds.length > 0) {
       const values = data.locationIds.map(lid => [id, lid]);
-      await query('INSERT INTO user_locations (user_id, location_id) VALUES ?', [values]);
+      await query('INSERT INTO asset_user_locations (user_id, location_id) VALUES ?', [values]);
     }
   }
 
@@ -104,20 +103,15 @@ async function deactivateUser(id) {
   // Verify user exists first (throws 404 if not)
   await getUserById(id);
 
-  await query('UPDATE users SET is_active = 0 WHERE id = ?', [id]);
+  await query('UPDATE asset_users SET is_active = 0 WHERE id = ?', [id]);
 
   return getUserById(id);
 }
 
-async function resetPassword(id, newPassword) {
-  // Verify user exists first (throws 404 if not)
-  await getUserById(id);
-
-  const passwordHash = await bcrypt.hash(newPassword, 12);
-  await query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, id]);
-
-  // Return the user (without passwordHash)
-  return getUserById(id);
+async function resetPassword() {
+  const err = new Error('Password is managed by the company intranet. Please contact IT to reset passwords.');
+  err.statusCode = 400;
+  throw err;
 }
 
 module.exports = { getUsers, getUserById, updateUser, deactivateUser, resetPassword };

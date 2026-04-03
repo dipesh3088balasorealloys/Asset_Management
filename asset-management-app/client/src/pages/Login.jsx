@@ -134,6 +134,7 @@ export default function Login({ onLogin }) {
             </div>
             <div className="form-group" style={{ marginBottom: 28 }}>
               <label style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>Password</label>
+              <p style={{ fontSize: '0.75rem', color: '#999', margin: '0 0 6px 0' }}>Use Intranet password</p>
               <div style={{ position: 'relative', width: '100%' }}>
                 <input
                   type={showPassword ? 'text' : 'password'}
